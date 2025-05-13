@@ -10,7 +10,10 @@ import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoginSuccess: (String) -> Unit) {
+fun LoginScreen(
+    onLoginSuccess: (String) -> Unit,
+    onNavigateToRegister: () -> Unit
+) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -48,10 +51,9 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
         Button(
             onClick = {
                 if (username == "admin" && password == "1234") {
-                    errorMessage = null
-                    onLoginSuccess("administrador") // ✅ ejecutar función correctamente
+                    onLoginSuccess("administrador")
                 } else {
-                    errorMessage = "Usuario o contraseña incorrectos"
+                    errorMessage = "Credenciales incorrectas"
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -59,9 +61,13 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
             Text("Ingresar")
         }
 
-        if (errorMessage != null) {
+        TextButton(onClick = onNavigateToRegister) {
+            Text("¿No tienes cuenta? Regístrate")
+        }
+
+        errorMessage?.let {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(errorMessage!!, color = MaterialTheme.colorScheme.error)
+            Text(it, color = MaterialTheme.colorScheme.error)
         }
     }
 }

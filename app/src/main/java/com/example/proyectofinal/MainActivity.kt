@@ -6,10 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.Surface
-import com.example.proyectofinal.Model.MainScreen
+import androidx.navigation.compose.rememberNavController
 import com.example.proyectofinal.ui.theme.ProyectoFinalTheme
-
-
 
 class MainActivity : ComponentActivity() {
 
@@ -21,10 +19,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             ProyectoFinalTheme {
                 Surface {
-                    MainScreen(viewModel)
+                    val navController = rememberNavController()
+                    AppNavigation(navController)
                 }
             }
         }
     }
 }
-
