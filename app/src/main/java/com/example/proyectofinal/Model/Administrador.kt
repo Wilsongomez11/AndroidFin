@@ -1,8 +1,8 @@
 package com.example.proyectofinal.Model
 
 data class Administrador(
-    val id: Long,
+    val username: String,
+    val password: String,
     val nombre: String,
-    val apellido: String,
-    val correo: String
+    val cargo: String
 )

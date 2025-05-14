@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
             ProyectoFinalTheme {
                 Surface {
                     val navController = rememberNavController()
-                    AppNavigation(navController)
+                    AppNavigation(navController = navController)
                 }
             }
         }

@@ -9,11 +9,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.proyectofinal.AdministradorViewModel
 import com.example.proyectofinal.Model.Administrador
 
 @Composable
-fun AdministradoresScreen(viewModel: AdministradorViewModel = viewModel()) {
+fun AdministradoresScreen(
+    navController: NavHostController,
+    viewModel: AdministradorViewModel = viewModel()
+) {
     val administradores by viewModel.administradores.collectAsState()
     val error by viewModel.error.collectAsState()
 
@@ -50,21 +54,28 @@ fun AdministradoresScreen(viewModel: AdministradorViewModel = viewModel()) {
                 }
             }
         }
-    }
-}
 
-@Composable
-fun AdministradorItem(administrador: Administrador) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("ID: ${administrador.id}")
-            Text("Nombre: ${administrador.nombre}")
-            Text("Correo: ${administrador.correo}")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {
+            navController.popBackStack("adminHome", inclusive = false)
+        }) {
+            Text("Volver")
         }
     }
 }
+    @Composable
+    fun AdministradorItem(administrador: Administrador) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp), // Separación entre tarjetas
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Sombra de la tarjeta
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Cargo: ${administrador.cargo}")
+                Text("Nombre: ${administrador.nombre}")
+            }
+        }
+    }
+

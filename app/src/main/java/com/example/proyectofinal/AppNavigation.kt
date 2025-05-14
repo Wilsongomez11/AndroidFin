@@ -3,50 +3,53 @@ package com.example.proyectofinal
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.admin.AdminHomeScreen
 import com.example.proyectofinal.admin.AdministradoresScreen
 import com.example.proyectofinal.login.LoginScreen
-import com.example.proyectofinal.login.RegisterScreen
+
 
 @SuppressLint("ComposableDestinationInComposeScope")
 @Composable
 fun AppNavigation(navController: NavHostController) {
-    NavHost(
-        navController = navController,
-        startDestination = "login"
-    ) {
-        composable("login") {
-            LoginScreen(
-                onLoginSuccess = { rol ->
-                    if (rol == "administrador") {
-                        navController.navigate("adminHome")
-                    }
-                },
-                onNavigateToRegister = {
-                    navController.navigate("register")
-                }
-            )
-        }
+    val adminProfileState = remember { mutableStateOf<Administrador?>(null) }
 
-        composable("register") {
-            RegisterScreen(onRegisterSuccess = {
-                navController.popBackStack() // Vuelve al login al registrarse
-            })
+    NavHost(navController = navController, startDestination = "login") {
+        composable("login") {
+            LoginScreen { adminProfile ->
+                adminProfileState.value = adminProfile
+                navController.navigate("adminHome")
+            }
         }
 
         composable("adminHome") {
-            AdminHomeScreen(navController)
+            adminProfileState.value?.let { profile ->
+                AdminHomeScreen(navController, profile)
+            }
         }
 
         composable("verPersonal") {
-            AdministradoresScreen()
+            AdministradoresScreen(navController)
         }
 
         composable("agregarProducto") {
-            AgregarProductoScreen()
+            AgregarProductoScreen(navController)
         }
+        composable("inventario") {
+            InventarioScreen(navController)
+        }
+        composable("agregarMesero") {
+            AgregarMeseroScreen(navController, viewModelScope)
+        }
+        composable("agregarProveedor") {
+            AgregarProveedorScreen(navController)
+        }
+
     }
 }
+

@@ -15,10 +15,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 
 
 @Composable
-fun AgregarProductoScreen(viewModel: ProductoViewModel = viewModel()) {
+fun AgregarProductoScreen(
+    navController: NavHostController,
+    viewModel: ProductoViewModel = viewModel()) {
     var nombre by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
@@ -57,6 +60,11 @@ fun AgregarProductoScreen(viewModel: ProductoViewModel = viewModel()) {
         if (mensaje.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(mensaje, color = MaterialTheme.colorScheme.primary)
+        }
+        Button(onClick = {
+            navController.popBackStack()
+        }) {
+            Text("Volver")
         }
     }
 }

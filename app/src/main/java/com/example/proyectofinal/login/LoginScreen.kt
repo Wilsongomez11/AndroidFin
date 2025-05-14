@@ -7,12 +7,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectofinal.Model.Administrador
+import com.example.proyectofinal.admin.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String) -> Unit,
-    onNavigateToRegister: () -> Unit
+    viewModel: AuthViewModel = viewModel(),
+    onLoginSuccess: (Administrador) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -48,21 +51,15 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (username == "admin" && password == "1234") {
-                    onLoginSuccess("administrador")
-                } else {
-                    errorMessage = "Credenciales incorrectas"
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Button(onClick = {
+            if (viewModel.validateCredentials(username, password)) {
+                val perfil = viewModel.getAdministrador()
+                onLoginSuccess(perfil)
+            } else {
+                errorMessage = "Credenciales inválidas"
+            }
+        }, modifier = Modifier.fillMaxWidth()) {
             Text("Ingresar")
-        }
-
-        TextButton(onClick = onNavigateToRegister) {
-            Text("¿No tienes cuenta? Regístrate")
         }
 
         errorMessage?.let {
@@ -71,3 +68,4 @@ fun LoginScreen(
         }
     }
 }
+

@@ -29,7 +29,7 @@ fun MainScreen(viewModel: MainViewModel) {
         } else {
             LazyColumn(modifier = Modifier.padding(paddingValues)) {
                 items(administradores) { admin ->
-                    Text(text = "${admin.nombre} ${admin.apellido}")
+                    Text(text = "${admin.nombre} ")
                 }
             }
         }
