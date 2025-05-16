@@ -70,8 +70,7 @@ dependencies {
     kapt ("com.google.dagger:hilt-compiler:2.48")
     implementation ("androidx.navigation:navigation-compose:2.7.5")
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
-    implementation ("androidx.compose.material3:material3:1.2.1")
-    implementation ("androidx.navigation:navigation-compose:2.7.0")
+
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
@@ -99,4 +98,8 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.0.0")
 }
 
+private fun DependencyHandlerScope.kapt(string: String) {
+
+
+}
 

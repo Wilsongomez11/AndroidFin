@@ -73,7 +73,8 @@ fun LoginScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.LightGray,
-                    textColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
                     focusedLabelColor = Color.White,
                     unfocusedLabelColor = Color.LightGray,
                     cursorColor = Color.White,
@@ -93,7 +94,8 @@ fun LoginScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.LightGray,
-                    textColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
                     focusedLabelColor = Color.White,
                     unfocusedLabelColor = Color.LightGray,
                     cursorColor = Color.White,

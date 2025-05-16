@@ -2,9 +2,8 @@ package com.example.proyectofinal.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Api.RetrofitClient
+import com.example.proyectofinal.Apia.ApiClient
 import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.Model.Producto
 import kotlinx.coroutines.flow.MutableStateFlow
