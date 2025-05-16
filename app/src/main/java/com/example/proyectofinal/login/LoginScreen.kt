@@ -1,18 +1,26 @@
 package com.example.proyectofinal.login
 
+import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.admin.AuthViewModel
-import android.widget.Toast
+import com.example.proyectofinal.R
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,54 +34,98 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Iniciar Sesión", style = MaterialTheme.typography.headlineMedium)
+    val background = painterResource(id = R.drawable.pizza_background)
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Usuario") },
-            modifier = Modifier.fillMaxWidth()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = background,
+            contentDescription = "Fondo divertido de Pizza Steve",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color(0xAA000000))
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                if (viewModel.validateCredentials(username, password)) {
-                    val admin = viewModel.getAdministrador()
-                    Toast.makeText(context, "Bienvenido ${admin.nombre}", Toast.LENGTH_SHORT).show()
-                    onLoginSuccess() // Usamos la navegación desde AppNavigation
-                } else {
-                    errorMessage = "Credenciales inválidas"
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Ingresar")
-        }
+            Text(
+                "Iniciar Sesión",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
+            )
 
-        errorMessage?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Usuario", color = Color.LightGray) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.LightGray,
+                    textColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.LightGray,
+                    cursorColor = Color.White,
+                    disabledBorderColor = Color.Gray,
+                    errorBorderColor = Color.Red
+                )
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(it, color = MaterialTheme.colorScheme.error)
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Contraseña", color = Color.LightGray) },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.LightGray,
+                    textColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.LightGray,
+                    cursorColor = Color.White,
+                    disabledBorderColor = Color.Gray,
+                    errorBorderColor = Color.Red
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (viewModel.validateCredentials(username, password)) {
+                        val admin = viewModel.getAdministrador()
+                        Toast.makeText(context, "Bienvenido ${admin.nombre}", Toast.LENGTH_SHORT).show()
+                        onLoginSuccess()
+                    } else {
+                        errorMessage = "Credenciales inválidas"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF5722)
+                )
+            ) {
+                Text("Ingresar", color = Color.White)
+            }
+
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(it, color = Color.Red)
+            }
         }
     }
 }
