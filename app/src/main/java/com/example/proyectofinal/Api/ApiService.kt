@@ -6,7 +6,10 @@ import com.example.proyectofinal.Model.Mesero
 import com.example.proyectofinal.Model.Pizzero
 import com.example.proyectofinal.Model.Producto
 import com.example.proyectofinal.Model.Proveedor
+import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 
 interface ApiService {
 
@@ -25,7 +28,26 @@ interface ApiService {
     @GET("productos")
     suspend fun getProductos(): List<Producto>
 
+
+
+    @POST("productos")
+    suspend fun agregarProducto(@Body producto: Producto): Response<Void>
+
+    @POST("/meseros")
+    suspend fun agregarMesero(@Body mesero: Mesero): Response<Void>
+
+
+
+
+    @POST("proveedores")
+    suspend fun agregarProveedor(@Body proveedor: Proveedor): Response<Proveedor>
+
     @GET("proveedores")
-    suspend fun getProveedores(): List<Proveedor>
+    suspend fun getProveedores(): Response<List<Proveedor>>
+
+
+
+
+
 
 }

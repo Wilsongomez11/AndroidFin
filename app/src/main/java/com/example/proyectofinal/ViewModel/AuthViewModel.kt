@@ -7,7 +7,7 @@ class AuthViewModel : ViewModel() {
     private val admin = Administrador(
         username = "admin",
         password = "1234",
-        nombre = "Wilson Gomez",
+        nombre = "Administrador",
         cargo = "Administrador General"
     )
 

@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.proyectofinal.AdministradorViewModel
+import com.example.proyectofinal.ViewModel.AdministradorViewModel
 import com.example.proyectofinal.Model.Administrador
 
 @Composable
@@ -64,18 +64,17 @@ fun AdministradoresScreen(
         }
     }
 }
-    @Composable
-    fun AdministradorItem(administrador: Administrador) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp), // Separación entre tarjetas
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Sombra de la tarjeta
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Cargo: ${administrador.cargo}")
-                Text("Nombre: ${administrador.nombre}")
-            }
+@Composable
+fun AdministradorItem(administrador: Administrador) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Cargo: ${administrador.cargo}")
+            Text("Nombre: ${administrador.nombre}")
         }
     }
-
+}

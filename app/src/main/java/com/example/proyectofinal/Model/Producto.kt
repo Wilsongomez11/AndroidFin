@@ -1,9 +1,14 @@
 package com.example.proyectofinal.Model
 
+
 data class Producto(
-    val id: Long,
+    val id: Int = 0,
     val nombre: String,
-    val descripcion: String,
-    val precio: Double
+    val precio: Double,
+    val cantidad: Int,
+    val idProveedor: Int,
+    val idAdministrador: Int
 )
+
+
 

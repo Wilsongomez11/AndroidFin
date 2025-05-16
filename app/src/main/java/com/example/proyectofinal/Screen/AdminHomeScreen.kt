@@ -1,5 +1,8 @@
-package com.example.proyectofinal.admin
+package com.example.proyectofinal.Screen
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,14 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.Model.Administrador
 @Composable
-fun AdminHomeScreen(navController: NavHostController, admin: Administrador) {
+fun AdminHomeScreen(
+    navController: NavHostController,
+    admin: Administrador,
+    administrador: Administrador,
+    onBack: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,4 +72,3 @@ fun AdminHomeScreen(navController: NavHostController, admin: Administrador) {
         }
     }
 }
-

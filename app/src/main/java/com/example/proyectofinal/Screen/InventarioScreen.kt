@@ -1,4 +1,4 @@
-package com.example.proyectofinal
+package com.example.proyectofinal.Screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
