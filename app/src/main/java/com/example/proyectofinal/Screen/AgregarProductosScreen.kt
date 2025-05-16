@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,7 +22,8 @@ import com.example.proyectofinal.ProductoViewModel
 
 
 @Composable
-fun AgregarProductoScreen(navController: NavHostController, viewModel: ProductoViewModel) {
+    fun AgregarProductoScreen(navController: NavHostController,
+                          viewModel: ProductoViewModel) {
     var nombre by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
@@ -65,7 +67,11 @@ fun AgregarProductoScreen(navController: NavHostController, viewModel: ProductoV
         }) {
             Text("Agregar Producto")
         }
+        Spacer(modifier = Modifier.height(16.dp))
 
+        Button(onClick = { navController.popBackStack() }) {
+            Text("Volver")
+        }
 
         if (mensaje.isNotEmpty()) {
             Text(mensaje)

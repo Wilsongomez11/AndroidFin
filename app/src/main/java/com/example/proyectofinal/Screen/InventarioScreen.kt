@@ -11,10 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.proyectofinal.ViewModel.AdministradorViewModel
 
 @Composable
-fun InventarioScreen(navController: NavHostController) {
+fun InventarioScreen(navController: NavHostController,
+                     viewModel: AdministradorViewModel = viewModel()) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("Inventario de Productos", style = MaterialTheme.typography.headlineSmall)
 

@@ -11,25 +11,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.Model.Administrador
+import com.example.proyectofinal.ViewModel.AdministradorViewModel
+
 @Composable
 fun AdminHomeScreen(
     navController: NavHostController,
-    admin: Administrador,
-    administrador: Administrador,
-    onBack: () -> Unit
+    viewModel: AdministradorViewModel = viewModel(),
+    onBack: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Bienvenido, ${admin.nombre}", style = MaterialTheme.typography.headlineMedium)
-        Text("Cargo: ${admin.cargo}", style = MaterialTheme.typography.bodyLarge)
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Text("Bienvenido Administrador", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = { navController.navigate("agregarProducto") }) {
             Text("Agregar Producto")
@@ -43,32 +43,26 @@ fun AdminHomeScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = {
-            navController.navigate("inventario")
-        }) {
+        Button(onClick = { navController.navigate("inventario") }) {
             Text("Ver Inventario")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = {
-            navController.navigate("agregarMesero")
-        }) {
+        Button(onClick = { navController.navigate("agregarMesero") }) {
             Text("Agregar Mesero")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = {
-            navController.navigate("agregarProveedor")
-        }) {
+        Button(onClick = { navController.navigate("agregarProveedor") }) {
             Text("Agregar Proveedor")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { navController.navigate("volver")}) {
-            Text("Volver incio")
+        Button(onClick = { navController.popBackStack() }) {
+            Text("Volver")
         }
     }
 }

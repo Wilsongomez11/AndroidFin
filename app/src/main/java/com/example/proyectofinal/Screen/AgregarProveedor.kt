@@ -12,10 +12,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.ProductoViewModel
+import com.example.proyectofinal.ViewModel.AdministradorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgregarProductoScreen(navController: NavHostController) {
+fun AgregarProductoScreen(navController: NavHostController,
+                          viewModel: AdministradorViewModel = viewModel()) {
     val viewModel: ProductoViewModel = viewModel()
     val context = LocalContext.current
 

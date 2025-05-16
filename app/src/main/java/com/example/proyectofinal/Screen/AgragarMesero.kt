@@ -15,35 +15,39 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.proyectofinal.ViewModel.AdministradorViewModel
 import com.example.proyectofinal.ViewModel.MeseroViewModel
 
 @Composable
-fun AgregarMeseroScreen(navController: NavHostController, viewModelScope: Nothing?){
-    // Estado para los campos de texto
-    var nombre = remember { "" }
-    var correo = remember { "" }
-    var telefono = remember { "" }
-    var mensaje = remember { "" }
+fun AgregarMeseroScreen(
+    navController: NavHostController,
+    viewModel: MeseroViewModel
+) {
+    var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf("") }
+    var mensaje by remember { mutableStateOf("") }
 
-    // ViewModel para la lógica de negocio
-    val viewModel: MeseroViewModel = viewModel()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Título
         Text("Agregar Nuevo Mesero", style = MaterialTheme.typography.headlineSmall)
 
-        // Campos de texto para ingresar los datos
         TextField(
             value = nombre,
             onValueChange = { nombre = it },
@@ -71,15 +75,12 @@ fun AgregarMeseroScreen(navController: NavHostController, viewModelScope: Nothin
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para agregar el mesero
         Button(
             onClick = {
-                // Llamada al ViewModel para agregar el mesero
                 viewModel.agregarMesero(nombre, correo, telefono) { resultado ->
                     mensaje = resultado
-                    Toast.makeText(navController.context, mensaje, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
                     if (resultado.contains("correctamente")) {
-                        // Redirigir si el mesero fue agregado con éxito
                         navController.popBackStack()
                     }
                 }
@@ -91,18 +92,12 @@ fun AgregarMeseroScreen(navController: NavHostController, viewModelScope: Nothin
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Mostrar mensaje de resultado
+        Button(onClick = { navController.popBackStack() }) {
+            Text("Volver")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(mensaje, style = MaterialTheme.typography.bodyMedium)
     }
-}
-
-annotation class
-viewModelScope
-
-@Preview(showBackground = true)
-@Composable
-fun AgregarMeseroPreview() {
-    val viewModelScope = null
-    AgregarMeseroScreen(navController = rememberNavController(), viewModelScope =
-        viewModelScope)
 }
