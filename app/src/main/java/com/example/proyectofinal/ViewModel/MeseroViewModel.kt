@@ -2,7 +2,7 @@ package com.example.proyectofinal.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyectofinal.Api.RetrofitClient
+import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Mesero
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -19,7 +19,7 @@ class MeseroViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val nuevoMesero = Mesero(nombre, correo, telefono)
-                val response = RetrofitClient.api.agregarMesero(nuevoMesero)
+                val response = ApiClient.apiService.agregarMesero(nuevoMesero)
 
                 if (response.isSuccessful) {
                     onResult("Mesero registrado correctamente")

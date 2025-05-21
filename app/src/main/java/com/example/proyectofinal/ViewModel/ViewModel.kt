@@ -2,8 +2,7 @@ package com.example.proyectofinal.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyectofinal.Api.RetrofitClient
-import com.example.proyectofinal.Apia.ApiClient
+import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.Model.Producto
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
-
 
     private val _administradores = MutableStateFlow<List<Administrador>>(emptyList())
     val administradores: StateFlow<List<Administrador>> = _administradores
@@ -41,7 +39,7 @@ class MainViewModel : ViewModel() {
     private fun getProductos() {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.api.getProductos()
+                val response = ApiClient.apiService.getProductos()
                 _productos.value = response
             } catch (e: Exception) {
                 _error.value = "Error al cargar productos: ${e.localizedMessage}"
@@ -52,8 +50,13 @@ class MainViewModel : ViewModel() {
     fun agregarProducto(producto: Producto) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.api.agregarProducto(producto)
-                _productos.value = (_productos.value + response) as List<Producto>
+                val response = ApiClient.apiService.agregarProducto(producto)
+                if (response.isSuccessful) {
+
+                    getProductos()
+                } else {
+                    _error.value = "Error al agregar el producto: ${response.code()}"
+                }
             } catch (e: Exception) {
                 _error.value = "Error al agregar el producto: ${e.localizedMessage}"
             }

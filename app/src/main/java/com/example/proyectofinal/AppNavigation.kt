@@ -33,10 +33,6 @@ fun AppNavigation(navController: NavHostController) {
             AdminHomeScreen(navController = navController)
         }
 
-        // Pantalla para agregar productos
-        composable("agregarProducto") {
-            AgregarProductoScreen(navController = navController)
-        }
 
         // Pantalla de inventario
         composable("inventario") {

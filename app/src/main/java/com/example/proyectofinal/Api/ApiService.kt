@@ -11,6 +11,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 
+
 interface ApiService {
 
     @GET("administradores")
@@ -28,26 +29,15 @@ interface ApiService {
     @GET("productos")
     suspend fun getProductos(): List<Producto>
 
-
-
     @POST("productos")
     suspend fun agregarProducto(@Body producto: Producto): Response<Void>
 
-    @POST("/meseros")
+    @POST("meseros")
     suspend fun agregarMesero(@Body mesero: Mesero): Response<Void>
-
-
-
-
-    @POST("proveedores")
-    suspend fun agregarProveedor(@Body proveedor: Proveedor): Response<Proveedor>
 
     @GET("proveedores")
     suspend fun getProveedores(): Response<List<Proveedor>>
 
-
-
-
-
-
+    @POST("proveedores")
+    suspend fun agregarProveedor(@Body proveedor: Proveedor): Response<Proveedor>
 }

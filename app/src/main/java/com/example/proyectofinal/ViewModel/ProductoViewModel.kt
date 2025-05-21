@@ -2,7 +2,7 @@ package com.example.proyectofinal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyectofinal.Api.RetrofitClient
+import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Producto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +22,7 @@ class ProductoViewModel : ViewModel() {
     fun obtenerProductos() {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.api.getProductos()
+                val response = ApiClient.apiService.getProductos()
                 _productos.value = response
             } catch (e: Exception) {
                 _mensaje.value = "Error al obtener productos: ${e.localizedMessage}"
@@ -49,7 +49,7 @@ class ProductoViewModel : ViewModel() {
                     idAdministrador = idAdministrador
                 )
 
-                val response = RetrofitClient.api.agregarProducto(producto)
+                val response = ApiClient.apiService.agregarProducto(producto)
 
                 if (response.isSuccessful) {
                     onResult("Producto agregado correctamente")

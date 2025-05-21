@@ -7,104 +7,100 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.proyectofinal.ProductoViewModel
-import com.example.proyectofinal.ViewModel.AdministradorViewModel
+import com.example.proyectofinal.ViewModel.AppBackground
+import com.example.proyectofinal.ViewModel.ProveedorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgregarProductoScreen(navController: NavHostController,
-                          viewModel: AdministradorViewModel = viewModel()) {
-    val viewModel: ProductoViewModel = viewModel()
+fun AgregarProveedorScreen(
+    navController: NavHostController,
+    viewModel: ProveedorViewModel = viewModel(),
+    onBack: () -> Unit = {}
+) {
+    var nombre by remember { mutableStateOf("") }
+    var contacto by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    var nombre by remember { mutableStateOf("") }
-    var precio by remember { mutableStateOf("") }
-    var cantidad by remember { mutableStateOf("") }
-    var idProveedor by remember { mutableStateOf("") }
-    var idAdministrador by remember { mutableStateOf("") }
-    var mensaje by remember { mutableStateOf<String?>(null) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Agregar Producto", style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = nombre,
-            onValueChange = { nombre = it },
-            label = { Text("Nombre del Producto") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = precio,
-            onValueChange = { precio = it },
-            label = { Text("Precio") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = cantidad,
-            onValueChange = { cantidad = it },
-            label = { Text("Cantidad") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = idProveedor,
-            onValueChange = { idProveedor = it },
-            label = { Text("ID del Proveedor") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = idAdministrador,
-            onValueChange = { idAdministrador = it },
-            label = { Text("ID del Administrador") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                viewModel.agregarProducto(
-                    nombre,
-                    precio.toDoubleOrNull() ?: 0.0,
-                    cantidad.toIntOrNull() ?: 0,
-                    idProveedor.toIntOrNull() ?: 0,
-                    idAdministrador.toIntOrNull() ?: 0,
-                    onResult = { resultado ->
-                        mensaje = resultado
-                    }
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+    AppBackground {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Agregar")
-        }
+            Text(
+                "Agregar Proveedor",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
+            )
 
-        mensaje?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            mensaje = null
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = { Text("Nombre del Proveedor") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.LightGray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.LightGray,
+                    cursorColor = Color.White,
+                    disabledBorderColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = contacto,
+                onValueChange = { contacto = it },
+                label = { Text("Contacto del Proveedor") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.LightGray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.LightGray,
+                    cursorColor = Color.White,
+                    disabledBorderColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    viewModel.agregarProveedor(nombre, contacto)
+                    Toast.makeText(context, "Proveedor agregado", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+            ) {
+                Text("Guardar", color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+            ) {
+                Text("Volver", color = Color.White)
+            }
         }
     }
 }
