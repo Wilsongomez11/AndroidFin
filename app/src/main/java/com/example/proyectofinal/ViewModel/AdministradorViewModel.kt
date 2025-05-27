@@ -2,13 +2,17 @@ package com.example.proyectofinal.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Administrador
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class AdministradorViewModel : ViewModel() {
+
+class AdministradorViewModel(
+    private val service: AdministradorService = ApiClient.apiService
+) : ViewModel() {
 
     private val _administradores = MutableStateFlow<List<Administrador>>(emptyList())
     val administradores: StateFlow<List<Administrador>> = _administradores
@@ -17,15 +21,20 @@ class AdministradorViewModel : ViewModel() {
     val error: StateFlow<String?> = _error
 
     init {
-        getAdministradores()
+        cargarAdministradores()
     }
 
-    private fun getAdministradores() {
+    fun cargarAdministradores() {
         viewModelScope.launch {
             try {
-                _administradores.value = ApiClient.apiService.getAdministradores()
+                val response = service.getAdministradores()
+                if (response.isSuccessful) {
+                    _administradores.value = response.body() ?: emptyList()
+                } else {
+                    _error.value = "Error al cargar administradores: ${response.code()}"
+                }
             } catch (e: Exception) {
-                _error.value = e.localizedMessage
+                _error.value = "Excepción: ${e.localizedMessage}"
             }
         }
     }
@@ -35,39 +44,38 @@ class AdministradorViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.eliminarAdministrador(id.toLong())
+                val response = service.eliminarAdministrador(id)
                 if (response.isSuccessful) {
-                    getAdministradores()
+                    cargarAdministradores()
                 } else {
                     _error.value = "Error al eliminar: ${response.code()} - ${response.message()}"
                 }
             } catch (e: Exception) {
-                _error.value = "Excepción: ${e.localizedMessage}"
+                _error.value = "Excepción al eliminar: ${e.localizedMessage}"
             }
         }
     }
 
-    fun editarAdministrador(id: Long, nuevoNombre: String, nuevoCargo: String) {
+    fun editarAdministrador(
+        id: Long,
+        nombre: String,
+        cargo: String,
+        password: String,
+        username: String
+    ) {
         viewModelScope.launch {
             try {
-                val administradorActualizado = Administrador(
-                    id = id,
-                    nombre = nuevoNombre,
-                    username = "Wil",
-                    password = "1234",
-                    cargo = nuevoCargo
-                )
+                val adminActualizado = Administrador(id = id, username =username, password = password, nombre = nombre, cargo = cargo)
 
-                val response =
-                    ApiClient.apiService.actualizarAdministrador(id, administradorActualizado)
+                val response = service.actualizarAdministrador(id, adminActualizado)
 
                 if (response.isSuccessful) {
-                    getAdministradores()
+                    cargarAdministradores()
                 } else {
-                    _error.value = "Error al editar: ${response.code()} - ${response.message()}"
+                    _error.value = "Error al actualizar: ${response.code()}"
                 }
             } catch (e: Exception) {
-                _error.value = "Excepción: ${e.localizedMessage}"
+                _error.value = "Excepción al actualizar: ${e.localizedMessage}"
             }
         }
     }

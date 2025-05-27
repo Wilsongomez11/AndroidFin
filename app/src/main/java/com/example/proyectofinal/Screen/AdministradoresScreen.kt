@@ -23,15 +23,9 @@ fun AdministradoresScreen(
     val administradores by viewModel.administradores.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    val adminFijo = Administrador(
-        username = "Wil",
-        password = "1234",
-        nombre = "Wilson",
-        cargo = "Administrador General"
-    )
 
     val listaCompleta = remember(administradores) {
-        listOf(adminFijo) + administradores.filter { it.username != "admin" }
+         administradores.filter { it.username != "admin" }
     }
 
     AppBackground {
@@ -76,15 +70,9 @@ fun AdministradoresScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(
-                    onClick = { navController.navigate("registroPersonal") },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                ) {
-                    Text("Agregar Personal", color = Color.Black)
-                }
 
                 Button(
-                    onClick = { navController.popBackStack("adminHome", inclusive = false) },
+                    onClick = { navController.navigate("adminHome") },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
                     Text("Volver", color = Color.Black)
@@ -118,7 +106,9 @@ fun AdministradorItemStyled(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 ) {
                     Button(
-                        onClick = { /* TODO: navController.navigate("editarPersonal/${administrador.id}") */ },
+                        onClick = {
+                            navController.navigate("editarPersonal/${administrador.id}")
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
                         modifier = Modifier.padding(end = 8.dp)
                     ) {

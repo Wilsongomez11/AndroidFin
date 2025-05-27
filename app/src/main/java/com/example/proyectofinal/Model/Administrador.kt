@@ -6,6 +6,7 @@ data class Administrador(
     val password: String,
     val nombre: String,
     val cargo: String
+
 )
 
 

@@ -18,7 +18,7 @@ import retrofit2.http.Path
 
 interface ApiService {
 
-    @GET("administradores")
+    @GET("administrador")
     suspend fun getAdministradores(): List<Administrador>
 
     @GET("clientes")
@@ -42,7 +42,7 @@ interface ApiService {
     @POST("pizzeros")
     suspend fun insertarPizzero(@Body pizzero: Pizzero): Response<Pizzero>
 
-    @POST("administradores")
+    @POST("administrador")
     suspend fun insertarAdministrador(@Body admin: Administrador): Response<Administrador>
 
     @GET("proveedores")
@@ -51,12 +51,9 @@ interface ApiService {
     @POST("proveedores")
     suspend fun agregarProveedor(@Body proveedor: Proveedor): Response<Proveedor>
 
-    @DELETE("administradores/{id}")
+    @DELETE("administrador/{id}")
     suspend fun eliminarAdministrador(@Path("id") id: Long): Response<Void>
 
-    @PUT("administradores/{id}")
-    suspend fun actualizarAdministrador(
-        @Path("id") id: Long,
-        @Body administrador: Administrador
-    ): Response<Administrador>
+    @PUT("administrador/{id}")
+    suspend fun actualizarAdministrador(@Path("id") id: Long, @Body administrador: Administrador): Response<Administrador>
 }

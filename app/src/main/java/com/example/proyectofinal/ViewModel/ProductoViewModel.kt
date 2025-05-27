@@ -24,12 +24,17 @@ class ProductoViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = ApiClient.apiService.getProductos()
-                _productos.value = response
+                if (response.isSuccessful) {
+                    _productos.value = response.body() ?: emptyList()
+                } else {
+                    _mensaje.value = "Error del servidor: ${response.code()}"
+                }
             } catch (e: Exception) {
                 _mensaje.value = "Error al obtener productos: ${e.localizedMessage}"
             }
         }
     }
+
 
     fun agregarProducto(
         nombre: String,
@@ -46,8 +51,8 @@ class ProductoViewModel : ViewModel() {
                     nombre = nombre,
                     precio = precio,
                     cantidad = cantidad,
-                    idProveedor = idProveedor,
-                    idAdministrador = idAdministrador
+                    idProveedor = idProveedor.toLong(),
+                    idAdministrador = idAdministrador.toLong()
                 )
 
                 val response = ApiClient.apiService.agregarProducto(producto.toDTO())

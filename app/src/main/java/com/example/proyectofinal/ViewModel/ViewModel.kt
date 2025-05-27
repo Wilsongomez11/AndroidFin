@@ -21,8 +21,6 @@ class MainViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-
-
     init {
         getAdministradores()
         getProductos()
@@ -32,21 +30,26 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = ApiClient.apiService.getAdministradores()
-                _administradores.value = response
+                if (response.isSuccessful) {
+                    _administradores.value = response.body() ?: emptyList()
+                } else {
+                    _error.value = "Error al cargar administradores: ${response.code()}"
+                }
             } catch (e: Exception) {
                 _error.value = "Error al cargar administradores: ${e.localizedMessage}"
             }
         }
-    }
-    fun esAdminFijo(id: Long?): Boolean {
-        return id == -1L
     }
 
     private fun getProductos() {
         viewModelScope.launch {
             try {
                 val response = ApiClient.apiService.getProductos()
-                _productos.value = response
+                if (response.isSuccessful) {
+                    _productos.value = response.body() ?: emptyList()
+                } else {
+                    _error.value = "Error al cargar productos: ${response.code()}"
+                }
             } catch (e: Exception) {
                 _error.value = "Error al cargar productos: ${e.localizedMessage}"
             }
@@ -58,7 +61,6 @@ class MainViewModel : ViewModel() {
             try {
                 val response = ApiClient.apiService.agregarProducto(producto.toDTO())
                 if (response.isSuccessful) {
-
                     getProductos()
                 } else {
                     _error.value = "Error al agregar el producto: ${response.code()}"
@@ -68,4 +70,25 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
+
+    fun editarAdministrador(id: Long, nuevoNombre: String, nuevoCargo: String, nuevoPassword: String, nuevoUsername: String) {
+        viewModelScope.launch {
+            try {
+                val adminActual = _administradores.value.find { it.id == id }
+                if (adminActual != null) {
+                    val adminEditado = adminActual.copy(nombre = nuevoNombre, cargo = nuevoCargo, password = nuevoPassword, username = nuevoUsername)
+                    val response = ApiClient.apiService.actualizarAdministrador(id, adminEditado)
+                    if (response.isSuccessful) {
+                        getAdministradores()
+                    } else {
+                        _error.value = "Error al actualizar administrador: ${response.code()}"
+                    }
+                }
+            } catch (e: Exception) {
+                _error.value = "Error al actualizar administrador: ${e.localizedMessage}"
+            }
+        }
+    }
 }
+

@@ -39,7 +39,6 @@ fun AgregarPersonalScreen(
     var formularioActivo by remember { mutableStateOf("") }
     var mensaje by remember { mutableStateOf("") }
 
-
     val campoColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = Color.White,
         unfocusedBorderColor = Color.LightGray,
@@ -59,30 +58,43 @@ fun AgregarPersonalScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Agregar Personal", color = Color.White, style = MaterialTheme.typography.headlineMedium)
-
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (formularioActivo == "") {
-                Button(onClick = { formularioActivo = "Mesero" }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))) {
-                    Text("Agregar Mesero", color = Color.White)
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(onClick = { formularioActivo = "Pizzero" }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))) {
-                    Text("Agregar Pizzero", color = Color.White)
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(onClick = { formularioActivo = "Admin" }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))) {
-                    Text("Agregar Admin", color = Color.White)
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = { navController.popBackStack() }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) {
-                    Text("Volver", color = Color.White)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             when (formularioActivo) {
+                "" -> {
+                    Button(
+                        onClick = { formularioActivo = "Mesero" },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+                    ) {
+                        Text("Agregar Mesero", color = Color.White)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { formularioActivo = "Pizzero" },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+                    ) {
+                        Text("Agregar Pizzero", color = Color.White)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { formularioActivo = "Admin" },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+                    ) {
+                        Text("Agregar Admin", color = Color.White)
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("Volver", color = Color.White)
+                    }
+                }
+
                 "Mesero" -> {
                     var nombre by remember { mutableStateOf("") }
                     var telefono by remember { mutableStateOf("") }
@@ -93,20 +105,25 @@ fun AgregarPersonalScreen(
                     OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Correo") }, modifier = Modifier.fillMaxWidth(), colors = campoColors)
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(onClick = {
-                        if (nombre.isNotBlank() && telefono.isNotBlank() && email.isNotBlank()) {
-                            viewModel.guardarMesero(nombre, telefono, email) { mensaje = it }
-                        } else {
-                            mensaje = "Completa todos los campos"
-                        }
-                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))) {
+                    Button(
+                        onClick = {
+                            if (nombre.isNotBlank() && telefono.isNotBlank() && email.isNotBlank()) {
+                                viewModel.guardarMesero(nombre, telefono, email) { mensaje = it }
+                            } else {
+                                mensaje = "Completa todos los campos"
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+                    ) {
                         Text("Guardar Mesero", color = Color.White)
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(onClick = { formularioActivo = "" }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) {
+                    Button(
+                        onClick = { formularioActivo = "" },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
                         Text("Volver", color = Color.White)
                     }
                 }
@@ -121,20 +138,25 @@ fun AgregarPersonalScreen(
                     OutlinedTextField(value = direccion, onValueChange = { direccion = it }, label = { Text("Dirección") }, modifier = Modifier.fillMaxWidth(), colors = campoColors)
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(onClick = {
-                        if (nombre.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank()) {
-                            viewModel.guardarPizzero(nombre, telefono, direccion) { mensaje = it }
-                        } else {
-                            mensaje = "Completa todos los campos"
-                        }
-                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))) {
+                    Button(
+                        onClick = {
+                            if (nombre.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank()) {
+                                viewModel.guardarPizzero(nombre, telefono, direccion) { mensaje = it }
+                            } else {
+                                mensaje = "Completa todos los campos"
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+                    ) {
                         Text("Guardar Pizzero", color = Color.White)
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(onClick = { formularioActivo = "" }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) {
+                    Button(
+                        onClick = { formularioActivo = "" },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
                         Text("Volver", color = Color.White)
                     }
                 }
@@ -151,28 +173,40 @@ fun AgregarPersonalScreen(
                     OutlinedTextField(value = cargo, onValueChange = { cargo = it }, label = { Text("Cargo") }, modifier = Modifier.fillMaxWidth(), colors = campoColors)
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(onClick = {
-                        if (nombre.isNotBlank() && username.isNotBlank() && password.isNotBlank() && cargo.isNotBlank()) {
-                            viewModel.guardarAdministrador(nombre, username, password, cargo) { mensaje = it }
-                        } else {
-                            mensaje = "Completa todos los campos"
-                        }
-                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))) {
+                    Button(
+                        onClick = {
+                            if (nombre.isNotBlank() && username.isNotBlank() && password.isNotBlank() && cargo.isNotBlank()) {
+                                viewModel.guardarAdministrador(nombre, username, password, cargo) { mensaje = it }
+                            } else {
+                                mensaje = "Completa todos los campos"
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
+                    ) {
                         Text("Guardar Admin", color = Color.White)
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(onClick = { formularioActivo = "" }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) {
+                    Button(
+                        onClick = {
+                            if (!navController.popBackStack()) {
+                                navController.navigate("admin")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
                         Text("Volver", color = Color.White)
                     }
+
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(mensaje, color = Color.White)
+            if (mensaje.isNotBlank()) {
+                Text(mensaje, color = Color.White)
+            }
         }
     }
 }

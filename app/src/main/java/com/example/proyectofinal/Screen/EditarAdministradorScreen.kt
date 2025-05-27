@@ -36,15 +36,24 @@ fun EditarAdministradorScreen(
 ) {
     val administrador = viewModel.administradores.collectAsState().value.find { it.id?.toLong() == administradorId }
 
+    var username by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
     var cargo by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+
+    var initialized by remember { mutableStateOf(false) }
 
     LaunchedEffect(administrador) {
-        if (administrador != null) {
+        if (administrador != null && !initialized) {
+            username = administrador.username ?: ""
             nombre = administrador.nombre ?: ""
             cargo = administrador.cargo ?: ""
+            password = administrador.password ?: ""
+            initialized = true
         }
     }
+
 
     AppBackground {
         Column(
@@ -92,14 +101,56 @@ fun EditarAdministradorScreen(
                 )
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password", color = Color.LightGray) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.LightGray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.LightGray,
+                    cursorColor = Color.White
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("username", color = Color.LightGray) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.LightGray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.LightGray,
+                    cursorColor = Color.White
+                )
+            )
+
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-                viewModel.editarAdministrador(administradorId, nombre, cargo)
+                println("Guardando: $nombre, $cargo, $password, $username")
+                viewModel.editarAdministrador(administradorId, nombre, cargo, password, username)
                 navController.popBackStack()
             }) {
                 Text("Guardar cambios")
             }
+
+
         }
     }
 }

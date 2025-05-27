@@ -1,5 +1,6 @@
 package com.example.proyectofinal.Api
 
+import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.ApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -30,7 +31,7 @@ object ApiClient {
             )
             .build()
     }
-    val apiService: ApiService by lazy {
-        retrofit.create(ApiService::class.java)
+    val apiService: AdministradorService by lazy {
+        retrofit.create(AdministradorService::class.java)
     }
 }

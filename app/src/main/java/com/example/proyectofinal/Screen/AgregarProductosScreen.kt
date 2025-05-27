@@ -166,8 +166,8 @@ import com.example.proyectofinal.ViewModel.AppBackground
                     nombre = nombre,
                     precio = precio.toDoubleOrNull() ?: 0.0,
                     cantidad = cantidad.toIntOrNull() ?: 0,
-                    idProveedor = idProveedor.toIntOrNull() ?: 0,
-                    idAdministrador = idAdministrador.toIntOrNull() ?: 0
+                    idProveedor = (idProveedor.toIntOrNull() ?: 0).toLong(),
+                    idAdministrador = (idAdministrador.toIntOrNull() ?: 0).toLong()
                 )
 
                 viewModel.agregarProducto(

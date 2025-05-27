@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.Screen.AdminHomeScreen
 import com.example.proyectofinal.Screen.AgregarProductoScreen
 import com.example.proyectofinal.Screen.AgregarProveedor
@@ -17,9 +18,8 @@ import com.example.proyectofinal.login.LoginScreen
 
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "login") {
-
+fun AppNavigation(navController: NavHostController, adminService: AdministradorService) {
+    NavHost(navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
                 navController = navController,
@@ -27,9 +27,11 @@ fun AppNavigation(navController: NavHostController) {
                     navController.navigate("admin") {
                         popUpTo("login") { inclusive = true }
                     }
-                }
+                },
+                adminService = adminService
             )
         }
+
         composable("admin") {
             AdminHomeScreen(navController = navController)
         }
@@ -51,9 +53,13 @@ fun AppNavigation(navController: NavHostController) {
                 viewModel = viewModel
             )
         }
-        composable("editarAdministrador/{id}", arguments = listOf(navArgument("id") { type = NavType.LongType })) {
-            val id = it.arguments?.getLong("id") ?: -1
-            EditarAdministradorScreen(navController, id)
+
+        composable("editarPersonal/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")?.toLong()
+            id?.let {
+                EditarAdministradorScreen(administradorId = it, navController = navController)
+            }
+
         }
 
         composable("verPersonal") {

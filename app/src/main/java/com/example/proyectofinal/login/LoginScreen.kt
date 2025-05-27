@@ -18,21 +18,29 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.proyectofinal.Api.AdministradorService
+import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.admin.AuthViewModel
 import com.example.proyectofinal.R
+import com.example.proyectofinal.ViewModel.ViewModelProvider.AuthViewModelFactory
+import com.example.proyectofinal.admin.LoginState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavHostController,
-    onLoginSuccess: () -> Unit,
-    viewModel: AuthViewModel = viewModel()
+    onLoginSuccess: (Administrador) -> Unit,
+    adminService: AdministradorService
 ) {
+    val factory = remember { AuthViewModelFactory(adminService) }
+    val viewModel: AuthViewModel = viewModel(factory = factory)
+
     val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val loginState = viewModel.loginState
 
     val background = painterResource(id = R.drawable.pizza_background)
 
@@ -108,13 +116,7 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    if (viewModel.validateCredentials(username, password)) {
-                        val admin = viewModel.getAdministrador()
-                        Toast.makeText(context, "Bienvenido ${admin.nombre}", Toast.LENGTH_SHORT).show()
-                        onLoginSuccess()
-                    } else {
-                        errorMessage = "Credenciales inválidas"
-                    }
+                    viewModel.login(username, password)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -124,9 +126,31 @@ fun LoginScreen(
                 Text("Ingresar", color = Color.White)
             }
 
-            errorMessage?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(it, color = Color.Red)
+            when (loginState) {
+                is LoginState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+                }
+
+                is LoginState.Error -> {
+                    Text(
+                        loginState.message,
+                        color = Color.Red,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
+                is LoginState.Success -> {
+                    LaunchedEffect(Unit) {
+                        Toast.makeText(
+                            context,
+                            "Bienvenido ${loginState.admin.nombre}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        onLoginSuccess(loginState.admin)
+                    }
+                }
+
+                else -> {}
             }
         }
     }
