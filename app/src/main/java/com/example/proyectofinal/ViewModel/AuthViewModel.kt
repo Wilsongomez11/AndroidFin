@@ -5,9 +5,9 @@ import com.example.proyectofinal.Model.Administrador
 
 class AuthViewModel : ViewModel() {
     private val admin = Administrador(
-        username = "admin",
+        username = "Wil",
         password = "1234",
-        nombre = "Administrador",
+        nombre = "Wilson",
         cargo = "Administrador General"
     )
 

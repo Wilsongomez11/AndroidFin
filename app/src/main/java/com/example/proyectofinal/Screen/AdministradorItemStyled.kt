@@ -1,11 +1,11 @@
-package com.example.proyectofinal
+package com.example.proyectofinal.Screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,12 +24,13 @@ fun AdministradorItemStyled(
     navController: NavHostController,
     viewModel: AdministradorViewModel
 ) {
-    Card(
+    androidx.compose.material3.Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.DarkGray),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Cargo: ${administrador.cargo}", color = Color.White)
@@ -59,7 +60,11 @@ fun AdministradorItemStyled(
                     }
                 }
             } else {
-                Text("Administrador por defecto", color = Color.LightGray, modifier = Modifier.padding(top = 8.dp))
+                Text(
+                    "Administrador por defecto",
+                    color = Color.LightGray,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         }
     }

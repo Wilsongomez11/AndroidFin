@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.Model.Producto
+import com.example.proyectofinal.Model.toDTO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,6 +20,8 @@ class MainViewModel : ViewModel() {
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
+
+
 
     init {
         getAdministradores()
@@ -35,6 +38,9 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+    fun esAdminFijo(id: Long?): Boolean {
+        return id == -1L
+    }
 
     private fun getProductos() {
         viewModelScope.launch {
@@ -50,7 +56,7 @@ class MainViewModel : ViewModel() {
     fun agregarProducto(producto: Producto) {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.agregarProducto(producto)
+                val response = ApiClient.apiService.agregarProducto(producto.toDTO())
                 if (response.isSuccessful) {
 
                     getProductos()

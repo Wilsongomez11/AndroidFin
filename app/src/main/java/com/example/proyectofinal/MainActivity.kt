@@ -13,8 +13,6 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             AppNavigation(navController)
         }
-
-
     }
 }
 

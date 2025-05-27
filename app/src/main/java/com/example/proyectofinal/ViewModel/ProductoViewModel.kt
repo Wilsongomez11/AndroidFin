@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Producto
+import com.example.proyectofinal.Model.toDTO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -41,7 +42,7 @@ class ProductoViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val producto = Producto(
-                    id = 0, // o null, si el backend lo permite
+                    id = 0,
                     nombre = nombre,
                     precio = precio,
                     cantidad = cantidad,
@@ -49,11 +50,11 @@ class ProductoViewModel : ViewModel() {
                     idAdministrador = idAdministrador
                 )
 
-                val response = ApiClient.apiService.agregarProducto(producto)
+                val response = ApiClient.apiService.agregarProducto(producto.toDTO())
 
                 if (response.isSuccessful) {
                     onResult("Producto agregado correctamente")
-                    obtenerProductos() // Actualiza la lista
+                    obtenerProductos()
                 } else {
                     onResult("Error: ${response.code()}")
                 }

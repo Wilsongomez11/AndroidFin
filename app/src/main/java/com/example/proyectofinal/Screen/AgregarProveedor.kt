@@ -17,8 +17,9 @@ import com.example.proyectofinal.ViewModel.ProveedorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgregarProveedorScreen(
+fun AgregarProveedor(
     navController: NavHostController,
+    proveedorId: String? = null,
     viewModel: ProveedorViewModel = viewModel(),
     onBack: () -> Unit = {}
 ) {
@@ -39,7 +40,6 @@ fun AgregarProveedorScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
             )
-
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
@@ -82,9 +82,14 @@ fun AgregarProveedorScreen(
 
             Button(
                 onClick = {
-                    viewModel.agregarProveedor(nombre, contacto)
-                    Toast.makeText(context, "Proveedor agregado", Toast.LENGTH_SHORT).show()
-                    navController.popBackStack()
+                    if(nombre.isNotBlank() && contacto.isNotBlank()) {
+                        viewModel.agregarProveedor(nombre, contacto) {
+                            Toast.makeText(context, "Proveedor agregado", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
+                        }
+                    } else {
+                        Toast.makeText(context, "Complete todos los campos", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))

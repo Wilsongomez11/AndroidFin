@@ -79,11 +79,11 @@ fun AdminHomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = { navController.navigate("agregarMesero") },
+                onClick = { navController.navigate("agregarPersonal") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = buttonColors
             ) {
-                Text("Agregar Mesero", color = Color.White)
+                Text("Agregar Personal", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(12.dp))

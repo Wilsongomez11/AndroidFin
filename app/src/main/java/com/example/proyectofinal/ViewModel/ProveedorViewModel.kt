@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+
 class ProveedorViewModel : ViewModel() {
 
     private val _proveedores = MutableStateFlow<List<Proveedor>>(emptyList())
@@ -35,16 +36,15 @@ class ProveedorViewModel : ViewModel() {
         }
     }
 
-    fun agregarProveedor(nombre: String, contacto: String) {
+    fun agregarProveedor(nombre: String, contacto: String, onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             try {
-                val proveedor = Proveedor(
-                    nombre = nombre,
-                    contacto = contacto
-                )
+                val proveedor = Proveedor(nombre = nombre, contacto = contacto)
                 val response = ApiClient.apiService.agregarProveedor(proveedor)
                 if (response.isSuccessful && response.body() != null) {
+                    // Actualiza la lista local con el nuevo proveedor
                     _proveedores.value = _proveedores.value + response.body()!!
+                    onComplete()
                 } else {
                     _error.value = "Error al agregar proveedor: ${response.code()}"
                 }
@@ -54,3 +54,5 @@ class ProveedorViewModel : ViewModel() {
         }
     }
 }
+
+

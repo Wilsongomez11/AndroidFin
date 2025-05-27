@@ -10,7 +10,7 @@ import androidx.navigation.compose.rememberNavController
 class AppState(
     val navController: NavHostController
 ) {
-    // Funciones de navegación seguras
+
     fun navigate(route: String) {
         try {
             navController.navigate(route) {
