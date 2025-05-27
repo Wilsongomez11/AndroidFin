@@ -21,7 +21,6 @@ fun InventarioScreen(navController: NavHostController,
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("Inventario de Productos", style = MaterialTheme.typography.headlineSmall)
 
-        // Aquí agregarías una LazyColumn para mostrar productos, por ahora solo texto:
         Spacer(Modifier.height(16.dp))
         Text("Aquí se mostrará el listado de productos...")
 
