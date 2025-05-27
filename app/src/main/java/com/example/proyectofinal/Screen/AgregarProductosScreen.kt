@@ -40,6 +40,7 @@ import com.example.proyectofinal.ViewModel.AppBackground
     var idAdministrador by remember { mutableStateOf("") }
     var mensaje by remember { mutableStateOf("") }
 
+
     AppBackground {
         Column(
             modifier = Modifier

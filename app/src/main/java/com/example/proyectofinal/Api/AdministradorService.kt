@@ -40,6 +40,8 @@ interface AdministradorService {
     @POST("pizzeros")
     suspend fun insertarPizzero(@Body pizzero: Pizzero): Response<Pizzero>
 
+    @POST("productos")
+    suspend fun agregarProducto(@Body producto: Producto): Response<Void>
 
     @POST("productos")
     suspend fun agregarProducto(@Body producto: ProductoDTO): Response<Producto>
