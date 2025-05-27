@@ -195,7 +195,7 @@ import com.example.proyectofinal.ViewModel.AppBackground
                           },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF5722)
+                    containerColor = Color(0xFFB2FF22)
                 )
                 ) {
 

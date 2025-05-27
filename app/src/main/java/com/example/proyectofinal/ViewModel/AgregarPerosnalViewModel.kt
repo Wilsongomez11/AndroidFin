@@ -7,7 +7,7 @@ import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.Model.Mesero
 import com.example.proyectofinal.Model.Pizzero
 import io.ktor.client.*
-import io.ktor.client.engine.cio.* // usa Android si prefieres
+import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
