@@ -7,6 +7,8 @@ data class ProductoDTO(
     val idProveedor: Long,
     val idAdministrador: Long
 )
+
+
 fun Producto.toDTO(): ProductoDTO {
     return ProductoDTO(
         nombre = this.nombre,
@@ -16,6 +18,7 @@ fun Producto.toDTO(): ProductoDTO {
         idAdministrador = this.idAdministrador
     )
 }
+
 
 
 

@@ -1,71 +1,69 @@
 package com.example.proyectofinal.Screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.navigation.NavHostController
-import com.example.proyectofinal.Model.Administrador
+import com.example.proyectofinal.Model.PersonalItem
 import com.example.proyectofinal.ViewModel.AdministradorViewModel
 
 @Composable
-fun AdministradorItemStyled(
-    administrador: Administrador,
+fun PersonalItemCard(
+    persona: PersonalItem,
     navController: NavHostController,
     viewModel: AdministradorViewModel
 ) {
-    androidx.compose.material3.Card(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = RoundedCornerShape(16.dp)
+            .padding(vertical = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A)),
+        elevation = CardDefaults.cardElevation(6.dp),
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Cargo: ${administrador.cargo}", color = Color.White)
-            Text("Nombre: ${administrador.nombre}", color = Color.White)
+            Text("👤 ${persona.nombre}", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text("💼 Cargo: ${persona.cargo}", color = Color(0xFFBBBBBB))
 
-            if (administrador.username != "admin") {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(top = 8.dp)
+            Spacer(Modifier.height(10.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = {
+                        when (persona.cargo) {
+                            "Administrador" -> navController.navigate("editarAdministrador/${persona.id}")
+                            "Mesero" -> navController.navigate("editarMesero/${persona.id}")
+                            "Pizzero" -> navController.navigate("editarPizzero/${persona.id}")
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
-                    Button(
-                        onClick = {
-                            navController.navigate("editarAdministrador/${administrador.id}")
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                    ) {
-                        Text("Editar", color = Color.Black)
-                    }
-
-                    Button(
-                        onClick = {
-                            viewModel.eliminarAdministrador(administrador.id)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                        Text("Eliminar", color = Color.White)
-                    }
+                    Text("Editar", color = Color.Black)
                 }
-            } else {
-                Text(
-                    "Administrador por defecto",
-                    color = Color.LightGray,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+
+                Button(
+                    onClick = {
+                        when (persona.cargo) {
+                            "Administrador" -> viewModel.eliminarAdministrador(persona.id)
+                            "Mesero" -> viewModel.eliminarMesero(persona.id)
+                            "Pizzero" -> viewModel.eliminarPizzero(persona.id)
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3B30))
+                ) {
+                    Text("Eliminar", color = Color.White)
+                }
             }
         }
     }
 }
+

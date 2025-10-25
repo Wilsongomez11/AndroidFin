@@ -46,6 +46,10 @@ android {
 
 dependencies {
 
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+    implementation("androidx.compose.animation:animation:1.5.4")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

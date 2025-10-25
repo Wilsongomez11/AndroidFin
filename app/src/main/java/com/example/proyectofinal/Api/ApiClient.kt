@@ -33,5 +33,13 @@ object ApiClient {
     }
     val apiService: AdministradorService by lazy {
         retrofit.create(AdministradorService::class.java)
+
     }
+    val apiServiceInsumo: InsumoService by lazy {
+        retrofit.create(InsumoService::class.java)
+    }
+    val productoInsumoService: ProductoInsumoService by lazy {
+        retrofit.create(ProductoInsumoService::class.java)
+    }
+
 }
