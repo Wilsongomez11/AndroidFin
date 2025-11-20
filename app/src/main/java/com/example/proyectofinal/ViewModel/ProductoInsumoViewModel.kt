@@ -19,7 +19,7 @@ class ProductoInsumoViewModel : ViewModel() {
     fun obtenerPorProducto(productoId: Long) {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.getInsumosByProducto(productoId)
+                val response = ApiClient.administradorService.getInsumosByProducto(productoId)
                 if (response.isSuccessful) {
                     _relaciones.value = response.body() ?: emptyList()
                 } else {
@@ -34,7 +34,7 @@ class ProductoInsumoViewModel : ViewModel() {
     fun agregarRelacion(nuevaRelacion: ProductoInsumo, onResult: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.crearProductoInsumo(nuevaRelacion)
+                val response = ApiClient.administradorService.crearProductoInsumo(nuevaRelacion)
                 if (response.isSuccessful) {
                     obtenerPorProducto(nuevaRelacion.producto?.id ?: 0)
                     onResult("Relación agregada correctamente")

@@ -3,6 +3,11 @@ package com.example.proyectofinal
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -11,27 +16,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.Screen.*
-import com.example.proyectofinal.ViewModel.AdministradorViewModel
-import com.example.proyectofinal.ViewModel.AppBackground
+import com.example.proyectofinal.ViewModel.*
 import com.example.proyectofinal.admin.VerPersonalScreen
 import com.example.proyectofinal.login.LoginScreen
 import com.example.proyectofinal.Model.Producto
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import com.example.proyectofinal.ViewModel.PedidoViewModel
-import com.example.proyectofinal.Screen.DetallePedidoScreen
-
+import com.example.proyectofinal.Model.Pedido
 
 @Composable
-fun AppNavigation(navController: NavHostController, adminService: AdministradorService) {
-
+fun AppNavigation(
+    navController: NavHostController,
+    adminService: AdministradorService
+) {
     val adminViewModel = remember { AdministradorViewModel() }
+    val pedidoViewModelCompartido: PedidoViewModel = viewModel()
 
-    NavHost(navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "login") {
 
-        // LOGIN
         composable("login") {
             LoginScreen(
                 navController = navController,
@@ -56,58 +56,119 @@ fun AppNavigation(navController: NavHostController, adminService: AdministradorS
             )
         }
 
-        // ADMIN
-        composable("admin") {
-            AdminHomeScreen(navController = navController, adminViewModel = adminViewModel)
-        }
+        composable("admin") { AdminHomeScreen(navController, adminViewModel) }
+        composable("mesero") { MeseroHomeScreen(navController) }
+        composable("pizzero") { PizzeroHomeScreen(navController) }
 
-        // PERSONAL
-        composable("personalMenu") {
-            PersonalMenuScreen(navController = navController)
-        }
+        composable("personalMenu") { PersonalMenuScreen(navController) }
+        composable("agregarPersonal") { AgregarPersonalScreen(navController) }
+        composable("verPersonal") { VerPersonalScreen(navController) }
 
-        composable("agregarPersonal") {
-            AgregarPersonalScreen(navController = navController)
-        }
+        composable("inventario") { InventarioScreen(navController) }
+        composable("caja") { CajaScreen(navController, adminViewModel, pedidoViewModelCompartido) }
 
-        composable("verPersonal") {
-            VerPersonalScreen(navController = navController)
-        }
-
-        // MESERO / PIZZERO
-        composable("mesero") { MeseroHomeScreen(navController = navController) }
-        composable("pizzero") { PizzeroHomeScreen(navController = navController) }
-
-        // INVENTARIO
-        composable("inventario") { InventarioScreen(navController = navController) }
-
-        // AGREGAR PRODUCTO
         composable("agregarProducto") {
-            val productoViewModel: ProductoViewModel = viewModel()
-            AgregarProductoScreen(
-                navController = navController,
-                viewModel = productoViewModel,
-                adminViewModel = adminViewModel
-            )
+            val vm: ProductoViewModel = viewModel()
+            AgregarProductoScreen(navController, vm, adminViewModel)
         }
 
-        // VER INVENTARIO
         composable("verInventario") {
-            val productoViewModel: ProductoViewModel = viewModel()
-            VerProductoScreen(navController = navController, viewModel = productoViewModel)
+            val vm: ProductoViewModel = viewModel()
+            VerProductoScreen(navController, vm)
         }
 
-        // Pantalla de Pedidos
+        composable("crearPedidoLibre") {
+            CrearPedidoScreen(navController = navController, mesaId = null, pedidoViewModel = pedidoViewModelCompartido)
+        }
+
+        composable(
+            route = "crearPedido/{mesaId}",
+            arguments = listOf(navArgument("mesaId") { type = NavType.IntType })
+        ) {
+            val mesaId = it.arguments?.getInt("mesaId")
+            CrearPedidoScreen(navController, mesaId, pedidoViewModelCompartido)
+        }
+
+        composable("mesas") {
+            MesasScreen(navController, pedidoViewModelCompartido)
+        }
+
+        composable(
+            route = "mesa/{mesaId}",
+            arguments = listOf(navArgument("mesaId") { type = NavType.IntType })
+        ) {
+            val mesaId = it.arguments?.getInt("mesaId") ?: 0
+            PedidoDeMesaScreen(navController, mesaId)
+        }
+
         composable("pedidos") {
-            val pedidoViewModel: PedidoViewModel = viewModel()
-            PedidosScreen(navController = navController, pedidoViewModel = pedidoViewModel)
+            PedidosScreen(navController, pedidoViewModelCompartido)
         }
 
-        composable("crearPedido") {
-            CrearPedidoScreen(navController = navController)
+        composable(
+            route = "detallePedido/{pedidoId}",
+            arguments = listOf(navArgument("pedidoId") { type = NavType.LongType })
+        ) { entry ->
+            val pedidoId = entry.arguments?.getLong("pedidoId") ?: 0L
+            val pedidos by pedidoViewModelCompartido.pedidos.collectAsState()
+            val pedido = remember(pedidos, pedidoId) { pedidos.find { it.id == pedidoId } }
+
+            when {
+                pedido == null && pedidos.isEmpty() -> {
+                    LaunchedEffect(Unit) { pedidoViewModelCompartido.obtenerPedidos() }
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+                pedido != null -> {
+                    DetallePedidoScreen(pedido, navController, pedidoViewModelCompartido)
+                }
+                else -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Pedido no encontrado", color = Color.White)
+                            Spacer(Modifier.height(16.dp))
+                            Button(onClick = { navController.popBackStack() }) {
+                                Text("Volver")
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        // INSUMOS
+        composable(
+            route = "devolverPedido/{pedidoId}",
+            arguments = listOf(navArgument("pedidoId") { type = NavType.LongType })
+        ) { entry ->
+            val pedidoId = entry.arguments?.getLong("pedidoId") ?: 0
+            val pedidos by pedidoViewModelCompartido.pedidos.collectAsState()
+            val pedido = remember(pedidos, pedidoId) { pedidos.find { it.id == pedidoId } }
+
+            when {
+                pedido == null && pedidos.isEmpty() -> {
+                    LaunchedEffect(Unit) { pedidoViewModelCompartido.obtenerPedidos() }
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+                pedido != null -> {
+                    DevolucionDetalleScreen(navController, pedido, pedidoViewModelCompartido)
+                }
+                else -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Pedido no encontrado", color = Color.White)
+                            Spacer(Modifier.height(16.dp))
+                            Button(onClick = { navController.popBackStack() }) {
+                                Text("Volver")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         composable(
             route = "insumos?returnTo={returnTo}",
             arguments = listOf(navArgument("returnTo") { defaultValue = "inventario" })
@@ -124,92 +185,37 @@ fun AppNavigation(navController: NavHostController, adminService: AdministradorS
             AppBackground { VerInsumosScreen(navController, returnTo) }
         }
 
-        // ✅ VER RECETA (corregido)
         composable(
             route = "verReceta/{productoId}",
             arguments = listOf(navArgument("productoId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val productoId = backStackEntry.arguments?.getLong("productoId") ?: 0L
-            val productoViewModel: ProductoViewModel = viewModel()
-            val productos by productoViewModel.productos.collectAsState()
+        ) { entry ->
+            val productoId = entry.arguments?.getLong("productoId") ?: 0L
+            val vm: ProductoViewModel = viewModel()
+            val productos by vm.productos.collectAsState()
 
-            // Cargar productos si aún no se han obtenido
-            LaunchedEffect(Unit) {
-                if (productos.isEmpty()) {
-                    productoViewModel.obtenerProductos()
-                }
-            }
+            LaunchedEffect(Unit) { vm.obtenerProductos() }
 
-            if (productos.isEmpty()) {
-                // Muestra spinner mientras carga
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color(0xFF5E17EB))
-                }
+            val producto = productos.find { it.id == productoId }
+
+            if (producto != null) {
+                VerRecetaScreen(producto, navController)
             } else {
-                val producto: Producto? = productos.find { it.id == productoId }
-                if (producto != null) {
-                    VerRecetaScreen(producto = producto, navController = navController)
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Producto no encontrado",
-                            color = Color.White,
-                            fontSize = 18.sp
-                        )
-                    }
+                Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    Text("Producto no encontrado", color = Color.White)
                 }
             }
         }
-        // AGREGAR PROVEEDOR
+
         composable(
             route = "agregarProveedor?id={id}",
-            arguments = listOf(
-                navArgument("id") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
-        ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")
-            AgregarProveedor(navController = navController, proveedorId = id)
-        }
-
-        // Pantalla para ver el detalle de un pedido
-        composable(
-            route = "detallePedido/{pedidoId}",
-            arguments = listOf(navArgument("pedidoId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val pedidoId = backStackEntry.arguments?.getLong("pedidoId") ?: 0L
-            val pedidoViewModel: PedidoViewModel = viewModel()
-            val pedidos by pedidoViewModel.pedidos.collectAsState()
-
-            // Cargar pedidos si aún no están cargados
-            LaunchedEffect(Unit) { pedidoViewModel.obtenerPedidos() }
-
-            val pedido = pedidos.find { it.id == pedidoId }
-
-            if (pedido != null) {
-                DetallePedidoScreen(
-                    pedido = pedido,
-                    navController = navController,
-                    pedidoViewModel = pedidoViewModel
-                )
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Pedido no encontrado", color = Color.White)
-                }
-            }
+            arguments = listOf(navArgument("id") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) { entry ->
+            val id = entry.arguments?.getString("id")
+            AgregarProveedor(navController, proveedorId = id)
         }
     }
 }
-

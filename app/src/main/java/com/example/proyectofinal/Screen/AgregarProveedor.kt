@@ -1,4 +1,3 @@
-
 package com.example.proyectofinal.Screen
 
 import android.widget.Toast
@@ -20,8 +19,7 @@ import com.example.proyectofinal.ViewModel.ProveedorViewModel
 fun AgregarProveedor(
     navController: NavHostController,
     proveedorId: String? = null,
-    viewModel: ProveedorViewModel = viewModel(),
-    onBack: () -> Unit = {}
+    viewModel: ProveedorViewModel = viewModel()
 ) {
     var nombre by remember { mutableStateOf("") }
     var contacto by remember { mutableStateOf("") }
@@ -36,10 +34,11 @@ fun AgregarProveedor(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Agregar Proveedor",
+                "\uD83D\uDC65 Agregar Proveedor",
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
             )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
@@ -82,9 +81,9 @@ fun AgregarProveedor(
 
             Button(
                 onClick = {
-                    if(nombre.isNotBlank() && contacto.isNotBlank()) {
+                    if (nombre.isNotBlank() && contacto.isNotBlank()) {
                         viewModel.agregarProveedor(nombre, contacto) {
-                            Toast.makeText(context, "Proveedor agregado", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Proveedor agregado correctamente", Toast.LENGTH_SHORT).show()
                             navController.popBackStack()
                         }
                     } else {
@@ -94,17 +93,7 @@ fun AgregarProveedor(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722))
             ) {
-                Text("Guardar", color = Color.White)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-            ) {
-                Text("Volver", color = Color.White)
+                Text("\uD83D\uDCBE Guardar", color = Color.White)
             }
         }
     }

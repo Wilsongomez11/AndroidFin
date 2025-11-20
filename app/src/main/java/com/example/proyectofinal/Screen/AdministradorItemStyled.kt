@@ -21,13 +21,13 @@ fun PersonalItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF5E17EB)),
         elevation = CardDefaults.cardElevation(6.dp),
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("👤 ${persona.nombre}", color = Color.White, style = MaterialTheme.typography.titleMedium)
-            Text("💼 Cargo: ${persona.cargo}", color = Color(0xFFBBBBBB))
+            Text("\uD83D\uDC64 ${persona.nombre}", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text("\uD83D\uDCBC Cargo: ${persona.cargo}", color = Color(0xFF5E17EB))
 
             Spacer(Modifier.height(10.dp))
 
@@ -58,7 +58,7 @@ fun PersonalItemCard(
                         }
                     },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3B30))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB))
                 ) {
                     Text("Eliminar", color = Color.White)
                 }
@@ -66,4 +66,5 @@ fun PersonalItemCard(
         }
     }
 }
+
 

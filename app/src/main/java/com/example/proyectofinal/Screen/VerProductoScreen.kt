@@ -29,7 +29,6 @@ fun VerProductoScreen(
     viewModel: ProductoViewModel
 ) {
     val productos by viewModel.productos.collectAsState()
-    val mensaje by viewModel.mensaje.collectAsState()
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -49,8 +48,7 @@ fun VerProductoScreen(
                         listOf(Color(0xFF0B093B), Color(0xFF3A0CA3), Color(0xFF7209B7))
                     )
                 )
-                .padding(padding),
-            contentAlignment = Alignment.Center
+                .padding(padding)
         ) {
             Column(
                 modifier = Modifier
@@ -58,7 +56,7 @@ fun VerProductoScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Inventario de Productos",
+                    text = "\uD83D\uDCCB Inventario de Productos",
                     color = Color.White,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
@@ -79,43 +77,18 @@ fun VerProductoScreen(
                                 if (producto.id != null) {
                                     viewModel.eliminarProducto(producto.id) {
                                         scope.launch {
-                                            snackbarHostState.showSnackbar("🗑️ Producto eliminado")
+                                            snackbarHostState.showSnackbar("\uD83D\uDDD1\uFE0F Producto eliminado")
                                         }
                                     }
                                 }
                             },
                             onActualizado = {
                                 scope.launch {
-                                    snackbarHostState.showSnackbar("✅ Producto actualizado correctamente")
+                                    snackbarHostState.showSnackbar("\u2705 Producto actualizado correctamente")
                                 }
                             },
-                            navController = navController // 👈 agregado, nada más
+                            navController = navController
                         )
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .size(100.dp)
-                        .shadow(8.dp, RoundedCornerShape(20.dp))
-                        .background(Color(0xFF1E1E1E), RoundedCornerShape(20.dp))
-                        .clickable {
-                            val popped = navController.popBackStack(route = "inventario", inclusive = false)
-                            if (!popped) {
-                                navController.navigate("inventario") {
-                                    popUpTo("inventario") { inclusive = true }
-                                }
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("↩️", fontSize = 28.sp)
-                        Spacer(Modifier.height(4.dp))
-                        Text("Volver", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -129,10 +102,9 @@ fun ProductoCardItem(
     onEliminar: () -> Unit,
     onActualizado: () -> Unit,
     viewModel: ProductoViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-    navController: NavHostController // ✅ agregado para poder navegar
+    navController: NavHostController
 ) {
     var enEdicion by rememberSaveable(producto.id) { mutableStateOf(false) }
-
     var nombre by rememberSaveable(producto.id) { mutableStateOf(producto.nombre) }
     var precio by rememberSaveable(producto.id) { mutableStateOf(producto.precio.toString()) }
     var cantidad by rememberSaveable(producto.id) { mutableStateOf(producto.cantidad.toString()) }
@@ -141,7 +113,7 @@ fun ProductoCardItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF5E17EB)),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
@@ -185,8 +157,8 @@ fun ProductoCardItem(
                     )
                 )
             } else {
-                Text("${producto.nombre}", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Text("💲 Precio: ${producto.precio}", color = Color.LightGray)
+                Text(producto.nombre, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("\uD83D\uDCB0 Precio: ${producto.precio}", color = Color.LightGray)
                 Text("Cantidad: ${producto.cantidad}", color = Color.LightGray)
             }
 
@@ -207,14 +179,12 @@ fun ProductoCardItem(
                                     idProveedor = producto.idProveedor,
                                     idAdministrador = producto.idAdministrador
                                 )
-
                                 viewModel.actualizarProducto(producto.id ?: 0L, dto) {
                                     onActualizado()
                                 }
-
                                 enEdicion = false
                             } catch (e: Exception) {
-                                println("⚠️ Error al actualizar producto: ${e.message}")
+                                println("Error al actualizar producto: ${e.message}")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A0CA3))
@@ -237,10 +207,9 @@ fun ProductoCardItem(
                     Text("Eliminar", color = Color.White)
                 }
 
-                // ✅ Nuevo botón para ver la receta del producto
                 Button(
                     onClick = { navController.navigate("verReceta/${producto.id}") },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A0CA3)),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.height(45.dp)
                 ) {

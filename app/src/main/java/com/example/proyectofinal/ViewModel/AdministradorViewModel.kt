@@ -12,10 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AdministradorViewModel(
-    val service: AdministradorService = ApiClient.apiService
+    val service: AdministradorService = ApiClient.administradorService
 ) : ViewModel() {
 
-    // 📦 Listas
     private val _administradores = MutableStateFlow<List<Administrador>>(emptyList())
     val administradores: StateFlow<List<Administrador>> = _administradores
 
@@ -29,22 +28,25 @@ class AdministradorViewModel(
     val error: StateFlow<String?> = _error
 
     private val _administradorActual = MutableStateFlow<Administrador?>(null)
-    val administradorActual = _administradorActual
+    val administradorActual: StateFlow<Administrador?> = _administradorActual
+
+    private val _adminNombre = MutableStateFlow("")
+    val adminNombre: StateFlow<String> = _adminNombre
+
+    private val _adminRol = MutableStateFlow("")
+    val adminRol: StateFlow<String> = _adminRol
 
     fun establecerAdministradorActual(admin: Administrador) {
         _administradorActual.value = admin
+        _adminNombre.value = admin.nombre
+        _adminRol.value = admin.cargo
     }
 
-    // -----------------------------------------------------
-    // Cerrar sesión
-    // -----------------------------------------------------
     fun cerrarSesion() {
         _administradorActual.value = null
+        _adminNombre.value = ""
+        _adminRol.value = ""
     }
-
-    // -----------------------------------------------------
-    // Funciones de carga
-    // -----------------------------------------------------
 
     fun cargarAdministradores() {
         viewModelScope.launch {
@@ -90,10 +92,6 @@ class AdministradorViewModel(
             }
         }
     }
-
-    // -----------------------------------------------------
-    // Funciones de edición (optimizadas)
-    // -----------------------------------------------------
 
     fun editarAdministrador(
         id: Long,
@@ -168,11 +166,6 @@ class AdministradorViewModel(
             }
         }
     }
-
-
-    // -----------------------------------------------------
-    // Funciones de eliminación
-    // -----------------------------------------------------
 
     fun eliminarAdministrador(id: Long?) {
         if (id == null) return

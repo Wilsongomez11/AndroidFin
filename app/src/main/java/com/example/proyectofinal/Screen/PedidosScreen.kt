@@ -1,5 +1,6 @@
 package com.example.proyectofinal.Screen
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,15 +11,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.Model.Pedido
 import com.example.proyectofinal.ViewModel.PedidoViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @Composable
 fun PedidosScreen(
@@ -27,191 +32,441 @@ fun PedidosScreen(
 ) {
     val pedidos by pedidoViewModel.pedidos.collectAsState()
     val mensaje by pedidoViewModel.mensaje.collectAsState()
+    val isRefreshing by pedidoViewModel.isRefreshing.collectAsState()
 
-    // Cargar pedidos al abrir pantalla
-    LaunchedEffect(Unit) { pedidoViewModel.obtenerPedidos() }
+    var filtroSeleccionado by remember { mutableStateOf("Todos") }
 
-    // Detectar si hay refresh (cuando se crea un pedido nuevo)
-    val refreshFlow = navController.currentBackStackEntry
-        ?.savedStateHandle
-        ?.getStateFlow("refreshPedidos", false)
-    val refresh by refreshFlow?.collectAsState() ?: remember { mutableStateOf(false) }
-
-    LaunchedEffect(refresh) {
-        if (refresh) {
-            pedidoViewModel.obtenerPedidos()
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set("refreshPedidos", false)
-        }
+    val pedidosFiltrados = remember(pedidos, filtroSeleccionado) {
+        when (filtroSeleccionado) {
+            "Pendientes" -> pedidos.filter { it.estado == "Pendiente" }
+            "Pagados" -> pedidos.filter { it.estado == "Pagado" }
+            "Devueltos" -> pedidos.filter { it.estado == "Devuelto" }
+            else -> pedidos
+        }.sortedByDescending { it.id }
     }
+
+    val pendientes = remember(pedidos) { pedidos.count { it.estado == "Pendiente" } }
+    val pagados = remember(pedidos) { pedidos.count { it.estado == "Pagado" } }
+    val devueltos = remember(pedidos) { pedidos.count { it.estado == "Devuelto" } }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFF0B093B), Color(0xFF3A0CA3), Color(0xFF7209B7))
+                    colors = listOf(
+                        Color(0xFF0B093B),
+                        Color(0xFF3A0CA3),
+                        Color(0xFF7209B7)
+                    )
                 )
             )
-            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing),
+            onRefresh = { pedidoViewModel.refrescar() },
+            modifier = Modifier.fillMaxSize()
         ) {
-            Text(
-                text = "📋 Gestión de Pedidos",
-                color = Color.White,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            // 🔹 Botón superior para crear pedido
-            Button(
-                onClick = { navController.navigate("crearPedido") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
-                shape = RoundedCornerShape(20.dp),
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-                    .padding(bottom = 16.dp)
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("➕ Crear Nuevo Pedido", color = Color.White, fontSize = 17.sp)
-            }
+                Text(
+                    text = "\uD83D\uDCCB Gesti\u00F3n de Pedidos",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
-            Divider(color = Color.White.copy(alpha = 0.3f))
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Pedidos Registrados",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (pedidos.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "No hay pedidos registrados todavía",
-                        color = Color.LightGray,
-                        fontSize = 16.sp
+                    IndicadorCardPedido(
+                        emoji = "\u231B",
+                        label = "Pendientes",
+                        value = pendientes.toString(),
+                        onClick = { filtroSeleccionado = "Pendientes" },
+                        isSelected = filtroSeleccionado == "Pendientes"
+                    )
+                    IndicadorCardPedido(
+                        emoji = "\u2705",
+                        label = "Pagados",
+                        value = pagados.toString(),
+                        onClick = { filtroSeleccionado = "Pagados" },
+                        isSelected = filtroSeleccionado == "Pagados"
+                    )
+                    IndicadorCardPedido(
+                        emoji = "\u21A9",
+                        label = "Devueltos",
+                        value = devueltos.toString(),
+                        onClick = { filtroSeleccionado = "Devueltos" },
+                        isSelected = filtroSeleccionado == "Devueltos"
                     )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(pedidos) { pedido ->
-                        PedidoCard(
-                            pedido = pedido,
-                            onEliminar = {
-                                pedidoViewModel.eliminarPedido(pedido.id ?: 0L)
-                            },
-                            onVerDetalle = {
-                                navController.navigate("detallePedido/${pedido.id}")
-                            }
+
+                if (filtroSeleccionado != "Todos") {
+                    Button(
+                        onClick = { filtroSeleccionado = "Todos" },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF7E57C2)
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .height(45.dp)
+                    ) {
+                        Text(
+                            text = "\uD83D\uDCCB Ver Todos (${pedidos.size})",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     }
                 }
-            }
 
-            if (mensaje.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = mensaje,
-                    color = Color.Yellow,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Button(
+                    onClick = { navController.navigate("mesas") },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF5E17EB)
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(60.dp)
+                ) {
+                    Text(
+                        text = "\uD83C\uDF74 Gestionar Mesas",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                if (pedidosFiltrados.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "\uD83D\uDCE6",
+                                fontSize = 64.sp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No hay pedidos",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = when (filtroSeleccionado) {
+                                    "Pendientes" -> "en estado pendiente"
+                                    "Pagados" -> "pagados"
+                                    "Devueltos" -> "devueltos"
+                                    else -> "registrados"
+                                },
+                                color = Color.White.copy(alpha = 0.7f),
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = pedidosFiltrados,
+                            key = { it.id ?: 0 }
+                        ) { pedido ->
+                            PedidoCardAdmin(
+                                pedido = pedido,
+                                onClick = {
+                                    navController.navigate("detallePedido/${pedido.id}")
+                                },
+                                onEliminar = {
+                                    pedidoViewModel.eliminarPedido(pedido.id!!)
+                                },
+                                onDevolver = if (pedido.estado == "Pagado") {
+                                    { navController.navigate("devolverPedido/${pedido.id}") }
+                                } else null
+                            )
+                        }
+                    }
+                }
+
+                if (mensaje.isNotEmpty()) {
+                    Snackbar(
+                        modifier = Modifier.padding(8.dp),
+                        containerColor = Color(0xFF1E1E1E),
+                        contentColor = Color.White
+                    ) {
+                        Text(mensaje)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun PedidoCard(
+fun IndicadorCardPedido(
+    emoji: String,
+    label: String,
+    value: String,
+    onClick: () -> Unit,
+    isSelected: Boolean
+) {
+    Card(
+        modifier = Modifier
+            .width(110.dp)
+            .height(100.dp)
+            .shadow(if (isSelected) 12.dp else 6.dp, RoundedCornerShape(20.dp))
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color(0xFF5E17EB) else Color(0xFF1E1E1E)
+        ),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = emoji,
+                fontSize = 28.sp
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = value,
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = label,
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun PedidoCardAdmin(
     pedido: Pedido,
+    onClick: () -> Unit,
     onEliminar: () -> Unit,
-    onVerDetalle: () -> Unit
+    onDevolver: (() -> Unit)? = null
 ) {
     var mostrarDialogo by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onVerDetalle() },
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF3A0CA3))
+            .shadow(8.dp, RoundedCornerShape(20.dp))
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF1E1E1E)
+        ),
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("🆔 Pedido N° ${pedido.id}", color = Color.White, fontWeight = FontWeight.Bold)
-            Text("Estado: ${pedido.estado}", color = Color.LightGray)
-            Text("Total: $${pedido.total}", color = Color(0xFFFFC107))
-            Text("Fecha: ${pedido.fecha ?: "Sin fecha"}", color = Color.White.copy(0.8f))
-
-            // 🔹 Mostrar mesa y cliente si existen
-            pedido.mesa?.let {
-                Text("Mesa: $it", color = Color.White.copy(0.9f))
-            }
-            pedido.cliente?.let {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    "Cliente: ${it.nombre.ifBlank { "ID ${it.id}" }}",
-                    color = Color.White.copy(0.9f)
+                    text = "Pedido #${pedido.id}",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Detalles:", color = Color.White, fontWeight = FontWeight.Bold)
-            if (pedido.detalles.isNotEmpty()) {
-                pedido.detalles.forEach {
-                    Text(
-                        "- ${it.producto.nombre} x${it.cantidad} = $${it.cantidad * it.precioUnitario}",
-                        color = Color.White.copy(0.9f),
-                        fontSize = 14.sp
-                    )
+                val (estadoColor, estadoEmoji) = remember(pedido.estado) {
+                    when (pedido.estado) {
+                        "Pendiente" -> Color(0xFFFFA726) to "\u231B"
+                        "Pagado" -> Color(0xFF66BB6A) to "\u2705"
+                        "Devuelto" -> Color(0xFFEF5350) to "\u21A9"
+                        else -> Color.White to "\u2753"
+                    }
                 }
-            } else {
-                Text("- Sin detalles registrados", color = Color.LightGray, fontSize = 14.sp)
+
+                Surface(
+                    color = estadoColor.copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = estadoEmoji, fontSize = 14.sp)
+                        Text(
+                            text = pedido.estado,
+                            color = estadoColor,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Divider(color = Color.White.copy(alpha = 0.1f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
-                    onClick = onVerDetalle,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-                ) {
-                    Text("Ver Detalle")
+                Column {
+                    Text(
+                        text = "\uD83D\uDCB0 $${String.format("%.2f", pedido.total)}",
+                        color = Color(0xFF66BB6A),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "\uD83D\uDCC5 ${pedido.fecha ?: "Sin fecha"}",
+                        color = Color.LightGray,
+                        fontSize = 12.sp
+                    )
                 }
 
-                Button(
-                    onClick = { mostrarDialogo = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                pedido.cliente?.let {
+                    Text(
+                        text = "\uD83D\uDC64 ${it.nombre.ifBlank { "Cliente ${it.id}" }}",
+                        color = Color.LightGray,
+                        fontSize = 13.sp
+                    )
+                }
+            }
+
+            if (pedido.detalles.isNotEmpty()) {
+                Surface(
+                    color = Color.White.copy(alpha = 0.05f),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Eliminar", color = Color.White)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "\uD83C\uDF55 ${pedido.detalles.size} producto(s)",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Tap para ver detalles",
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                when (pedido.estado) {
+                    "Pendiente" -> {
+                        Button(
+                            onClick = onClick,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF7E57C2)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.weight(1f).height(42.dp)
+                        ) {
+                            Text("\uD83D\uDC41 Ver", color = Color.White, fontSize = 15.sp)
+                        }
+
+                        Button(
+                            onClick = { mostrarDialogo = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFEF5350)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.weight(1f).height(42.dp)
+                        ) {
+                            Text("\uD83D\uDDD1 Eliminar", color = Color.White, fontSize = 15.sp)
+                        }
+                    }
+                    "Pagado" -> {
+                        Button(
+                            onClick = onClick,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF7E57C2)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.weight(1f).height(42.dp)
+                        ) {
+                            Text("\uD83D\uDC41 Ver", color = Color.White, fontSize = 15.sp)
+                        }
+
+                        if (onDevolver != null) {
+                            Button(
+                                onClick = onDevolver,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF9C27B0)
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.weight(1f).height(42.dp)
+                            ) {
+                                Text("\u21A9 Devolver", color = Color.White, fontSize = 15.sp)
+                            }
+                        }
+                    }
+                    else -> {
+                        Button(
+                            onClick = onClick,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF7E57C2)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth().height(42.dp)
+                        ) {
+                            Text("\uD83D\uDC41 Ver Detalle", color = Color.White, fontSize = 15.sp)
+                        }
+                    }
                 }
             }
         }
     }
 
-    //  Diálogo de confirmación
     if (mostrarDialogo) {
         AlertDialog(
             onDismissRequest = { mostrarDialogo = false },
@@ -221,19 +476,33 @@ fun PedidoCard(
                         mostrarDialogo = false
                         onEliminar()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFEF5350)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Sí, eliminar", color = Color.White)
+                    Text("Eliminar", color = Color.White)
                 }
             },
             dismissButton = {
-                OutlinedButton(onClick = { mostrarDialogo = false }) {
+                TextButton(onClick = { mostrarDialogo = false }) {
                     Text("Cancelar", color = Color.White)
                 }
             },
-            title = { Text("Confirmar eliminación", color = Color.White) },
-            text = { Text("¿Seguro que deseas eliminar este pedido?", color = Color.LightGray) },
-            containerColor = Color(0xFF3A0CA3),
+            title = {
+                Text(
+                    "\u26A0 Confirmar",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    "\u00BFEliminar pedido #${pedido.id}?",
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+            },
+            containerColor = Color(0xFF1E1E1E),
             shape = RoundedCornerShape(20.dp)
         )
     }

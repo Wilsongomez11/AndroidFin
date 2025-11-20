@@ -1,4 +1,4 @@
-package com.example.proyectofinal.Api
+/**package com.example.proyectofinal.Api
 
 import com.example.proyectofinal.Model.Insumo
 import com.example.proyectofinal.Model.InsumoDTO
@@ -36,3 +36,4 @@ interface InsumoService {
     suspend fun eliminarInsumo(@Path("id") id: Long): Response<Void>
 
 }
+**/

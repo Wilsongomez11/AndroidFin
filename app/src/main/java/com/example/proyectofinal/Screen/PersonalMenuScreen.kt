@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -30,12 +31,14 @@ fun PersonalMenuScreen(navController: NavHostController) {
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(32.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             Text(
-                text = "Gestión de Personal",
+                text = "\uD83D\uDC65 Gestión de Personal",
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
@@ -47,29 +50,12 @@ fun PersonalMenuScreen(navController: NavHostController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 PersonalMenuButton(
-                    label = "Ver Personal",
-                    emoji = "👁",
+                    label = "\uD83D\uDC41\uFE0F Ver Personal",
                     onClick = { navController.navigate("verPersonal") }
                 )
                 PersonalMenuButton(
-                    label = "Agregar Personal",
-                    emoji = "➕",
+                    label = "\u2795 Agregar Personal",
                     onClick = { navController.navigate("agregarPersonal") }
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                PersonalMenuButton(
-                    label = "Volver",
-                    emoji = "↩️",
-                    onClick = {
-                        navController.navigate("admin") {
-                            popUpTo("personalMenu") { inclusive = true }
-                        }
-                    }
                 )
             }
         }
@@ -77,19 +63,22 @@ fun PersonalMenuScreen(navController: NavHostController) {
 }
 
 @Composable
-fun PersonalMenuButton(label: String, emoji: String, onClick: () -> Unit) {
+fun PersonalMenuButton(label: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(130.dp)
             .shadow(8.dp, RoundedCornerShape(20.dp))
-            .background(Color(0xFF1E1E1E), RoundedCornerShape(20.dp))
+            .background(Color(0xFF5E17EB), RoundedCornerShape(20.dp))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(emoji, fontSize = 40.sp)
-            Spacer(Modifier.height(8.dp))
-            Text(label, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        }
+        Text(
+            label,
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 6.dp),
+            textAlign = TextAlign.Center
+        )
     }
 }

@@ -31,14 +31,11 @@ fun VerRecetaScreen(
     insumoViewModel: InsumoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val relaciones by viewModel.relaciones.collectAsState()
-    val mensaje by viewModel.mensaje.collectAsState()
     val listaInsumos by insumoViewModel.insumos.collectAsState()
-
     var expanded by remember { mutableStateOf(false) }
     var insumoSeleccionado by remember { mutableStateOf<Insumo?>(null) }
     var cantidadUsada by remember { mutableStateOf("") }
 
-    // Cargar datos
     LaunchedEffect(producto.id) {
         viewModel.obtenerRelacionesPorProducto(producto.id)
         insumoViewModel.obtenerInsumos()
@@ -61,10 +58,8 @@ fun VerRecetaScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                // Título
                 Text(
-                    text = "Receta de ${producto.nombre}",
+                    text = "\uD83D\uDCC3 Receta de ${producto.nombre}",
                     color = Color.White,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -77,7 +72,6 @@ fun VerRecetaScreen(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // 🔹 Menú desplegable de insumos
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded },
@@ -118,7 +112,6 @@ fun VerRecetaScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 🔹 Campo para cantidad usada
                 OutlinedTextField(
                     value = cantidadUsada,
                     onValueChange = { cantidadUsada = it },
@@ -134,7 +127,6 @@ fun VerRecetaScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // 🔹 Botón para agregar insumo
                 Button(
                     onClick = {
                         if (insumoSeleccionado != null && cantidadUsada.isNotEmpty()) {
@@ -151,16 +143,17 @@ fun VerRecetaScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
                 ) {
-                    Text("Agregar Insumo", color = Color.White)
+                    Text("\u2795 Agregar Insumo", color = Color.White)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 🔹 Lista de insumos asociados
                 Text(
-                    text = "Insumos asociados:",
+                    text = "\uD83D\uDCCB Insumos asociados:",
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -193,18 +186,6 @@ fun VerRecetaScreen(
                             }
                         }
                     }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 🔹 Botón volver
-                Button(
-                    onClick = { navController.popBackStack() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E1E)),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.height(55.dp).width(150.dp)
-                ) {
-                    Text("↩️ Volver", color = Color.White, fontSize = 16.sp)
                 }
             }
         }

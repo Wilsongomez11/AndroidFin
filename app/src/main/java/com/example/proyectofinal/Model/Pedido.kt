@@ -3,12 +3,12 @@ package com.example.proyectofinal.Model
 data class Pedido(
     val id: Long? = null,
     val fecha: String? = null,
-    val estado: String = "Pendiente",
-    val total: Double = 0.0,
-    val mesa: String? = null,
-    val cliente: Cliente? = null,
+    val estado: String,
+    val total: Double,
+    val mesa: Mesa?,               // ← CORREGIDO
+    val cliente: Cliente?,
     val mesero: Mesero? = null,
-    val detalles: List<DetallePedido> = emptyList()
+    val detalles: List<DetallePedido>
 )
 
 data class DetallePedido(

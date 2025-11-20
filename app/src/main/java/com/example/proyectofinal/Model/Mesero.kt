@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 data class Mesero(
     val id: Long? = null,
     val nombre: String,
-    val correo: String,
-    val telefono: String,
-    val username: String,
-    val password: String
+    val correo: String = "",
+    val telefono: String = "",
+    val username: String = "",
+    val password: String = ""
 )

@@ -12,24 +12,21 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.ViewModel.MainViewModel
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     navController: NavHostController,
-    viewModel: MainViewModel) {
+    viewModel: MainViewModel
+) {
     val administradores by viewModel.administradores.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    Button(onClick = { navController.popBackStack() }) {
-        Text("Volver")
-    }
-
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Lista de Administradores") })
+            TopAppBar(
+                title = { Text("\uD83D\uDC68\u200D\uD83D\uDCBC Lista de Administradores", color = MaterialTheme.colorScheme.onPrimary) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
+            )
         }
     ) { paddingValues ->
         if (error != null) {
@@ -41,10 +38,16 @@ fun MainScreen(
         } else {
             LazyColumn(modifier = Modifier.padding(paddingValues)) {
                 items(administradores) { admin ->
-                    Text(text = "${admin.nombre} ")
+                    Text(
+                        text = admin.nombre,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                    Divider()
                 }
             }
         }
     }
-}
 
+    Spacer(modifier = Modifier.height(16.dp))
+}

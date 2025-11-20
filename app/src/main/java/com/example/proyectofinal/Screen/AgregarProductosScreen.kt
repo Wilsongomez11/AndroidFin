@@ -52,7 +52,7 @@ fun AgregarProductoScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                "📦 Agregar Producto",
+                "\uD83D\uDCE6 Agregar Producto",
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
@@ -75,63 +75,41 @@ fun AgregarProductoScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            BotonTarjetaPequeno(
+                emoji = "\u2795",
+                label = "Agregar",
+                colorFondo = Color(0xFF5E17EB),
+                modifier = Modifier.fillMaxWidth(0.6f)
             ) {
-                BotonTarjetaPequeno(
-                    emoji = "↩️",
-                    label = "Volver",
-                    colorFondo = Color(0xFF1E1E1E),
-                    modifier = Modifier.weight(1f)
-                ) {
-
-                    val popped = navController.popBackStack(route = "inventario", inclusive = false)
-                    if (!popped) {
-
-                        navController.navigate("inventario") {
-                            popUpTo("inventario") { inclusive = true }
-                        }
-                    }
+                if (administradorActual == null) {
+                    mensaje = "No se ha detectado un administrador activo."
+                    return@BotonTarjetaPequeno
                 }
 
-                BotonTarjetaPequeno(
-                    emoji = "➕",
-                    label = "Agregar",
-                    colorFondo = Color(0xFF1E1E1E),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    if (administradorActual == null) {
-                        mensaje = "No se ha detectado un administrador activo."
-                        return@BotonTarjetaPequeno
-                    }
+                val producto = Producto(
+                    id = 0,
+                    nombre = nombre,
+                    precio = precio.toDoubleOrNull() ?: 0.0,
+                    cantidad = cantidad.toIntOrNull() ?: 0,
+                    idProveedor = 0,
+                    idAdministrador = administradorActual!!.id ?: 0
+                )
 
-                    val producto = Producto(
-                        id = 0,
-                        nombre = nombre,
-                        precio = precio.toDoubleOrNull() ?: 0.0,
-                        cantidad = cantidad.toIntOrNull() ?: 0,
-                        idProveedor = 0,
-                        idAdministrador = administradorActual!!.id ?: 0
-                    )
-
-                    viewModel.agregarProducto(
-                        nombre,
-                        producto.precio,
-                        producto.cantidad,
-                        0,
-                        producto.idAdministrador.toInt()
-                    ) { resultado ->
-                        mensaje = resultado
-                        if (resultado.contains("éxito", true)) {
-                            Toast.makeText(
-                                navController.context,
-                                "Producto agregado correctamente",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            navController.popBackStack()
-                        }
+                viewModel.agregarProducto(
+                    nombre,
+                    producto.precio,
+                    producto.cantidad,
+                    0,
+                    producto.idAdministrador.toInt()
+                ) { resultado ->
+                    mensaje = resultado
+                    if (resultado.contains("éxito", true)) {
+                        Toast.makeText(
+                            navController.context,
+                            "Producto agregado correctamente",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navController.popBackStack()
                     }
                 }
             }

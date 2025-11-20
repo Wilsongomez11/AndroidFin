@@ -1,31 +1,40 @@
 package com.example.proyectofinal
 
-import com.example.proyectofinal.Model.Administrador
-import com.example.proyectofinal.Model.Cliente
-import com.example.proyectofinal.Model.Mesero
-import com.example.proyectofinal.Model.Pedido
-import com.example.proyectofinal.Model.Pizzero
-import com.example.proyectofinal.Model.Producto
-import com.example.proyectofinal.Model.ProductoDTO
-import com.example.proyectofinal.Model.Proveedor
+import com.example.proyectofinal.Model.*
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
+import retrofit2.http.*
 import retrofit2.http.Path
-import retrofit2.http.Query
-
 
 interface ApiService {
 
+    // --- ADMINISTRADORES ---
     @GET("administrador")
     suspend fun getAdministradores(): List<Administrador>
 
+    @POST("administrador")
+    suspend fun insertarAdministrador(@Body admin: Administrador): Response<Administrador>
+
+    @PUT("administrador/{id}")
+    suspend fun actualizarAdministrador(
+        @Path("id") id: Long,
+        @Body administrador: Administrador
+    ): Response<Administrador>
+
+    @DELETE("administrador/{id}")
+    suspend fun eliminarAdministrador(@Path("id") id: Long): Response<Void>
+
+
+    // --- CLIENTES ---
     @GET("clientes")
     suspend fun getClientes(): List<Cliente>
 
+
+    // --- PRODUCTOS ---
+    @GET("productos")
+    suspend fun getProductos(): List<Producto>
+
+    @POST("productos")
+    suspend fun agregarProducto(@Body productoDTO: ProductoDTO): Response<Producto>
 
     @PUT("productos/{id}")
     suspend fun actualizarProducto(
@@ -34,39 +43,15 @@ interface ApiService {
     ): Response<Void>
 
 
-    @GET("meseros")
-    suspend fun getMeseros(): List<Mesero>
-
-    @GET("pizeros")
-    suspend fun getPizeros(): List<Pizzero>
-
-    @GET("productos")
-    suspend fun getProductos(): List<Producto>
-
-    @POST("productos")
-    suspend fun agregarProducto(@Body productoDTO: ProductoDTO): Response<Producto>
-
-    @POST("meseros")
-    suspend fun insertarMesero(@Body mesero: Mesero): Response<Mesero>
-
-    @POST("pizzeros")
-    suspend fun insertarPizzero(@Body pizzero: Pizzero): Response<Pizzero>
-
-    @POST("administrador")
-    suspend fun insertarAdministrador(@Body admin: Administrador): Response<Administrador>
-
+    // --- PROVEEDORES ---
     @GET("proveedores")
     suspend fun getProveedores(): Response<List<Proveedor>>
 
     @POST("proveedores")
     suspend fun agregarProveedor(@Body proveedor: Proveedor): Response<Proveedor>
 
-    @DELETE("administrador/{id}")
-    suspend fun eliminarAdministrador(@Path("id") id: Long): Response<Void>
 
-    @PUT("administrador/{id}")
-    suspend fun actualizarAdministrador(@Path("id") id: Long, @Body administrador: Administrador): Response<Administrador>
-
+    // --- PEDIDOS ---
     @GET("pedidos")
     suspend fun getPedidos(): Response<List<Pedido>>
 
@@ -76,16 +61,111 @@ interface ApiService {
     @POST("pedidos")
     suspend fun crearPedido(@Body pedido: Pedido): Response<Pedido>
 
-    @DELETE("pedidos/{id}")
-    suspend fun eliminarPedido(@Path("id") id: Long): Response<Void>
+    @PUT("pedidos/{id}")
+    suspend fun actualizarPedido(
+        @Path("id") id: Long,
+        @Body pedido: Pedido
+    ): Response<Pedido>
 
-    // (Opcional si quieres manejar estados)
     @PUT("pedidos/{id}/estado")
     suspend fun actualizarEstadoPedido(
         @Path("id") id: Long,
-        @Query("estado") nuevoEstado: String
+        @Query("estado") estado: String
     ): Response<Void>
 
+    @DELETE("pedidos/{id}")
+    suspend fun eliminarPedido(@Path("id") id: Long): Response<Void>
+
+    @PUT("pedidos/{id}/devolver")
+    suspend fun devolverPedido(
+        @Path("id") id: Long,
+        @Body devolucion: DevolucionRequest
+    ): Response<Void>
+
+
+    @GET("pedidos/mesas/estado")
+    suspend fun getEstadoMesas(): Response<Map<Int, String>>
+
+
+    @GET("pedidos/mesas/ocupadas")
+    suspend fun getMesasOcupadas(): Response<List<Int>>
+
+    // --- CAJA ---
+    @GET("caja/hoy")
+    suspend fun getCajaDelDia(): Response<Caja>
+
+    @GET("movimientos")
+    suspend fun getMovimientos(): Response<List<MovimientoCaja>>
+
+
+    // --- PAGOS ---
+    @POST("pagos/registrar")
+    suspend fun registrarPago(
+        @Query("pedidoId") pedidoId: Long,
+        @Query("montoPagado") montoPagado: Double,
+        @Query("adminId") adminId: Long
+    ): Map<String, Any>
+
+    // ---INSUMOS---
+    @GET("insumos")
+    suspend fun getInsumos(): Response<List<Insumo>>
+
+    @GET("insumos/{id}")
+    suspend fun getInsumoById(@Path("id") id: Long): Response<Insumo>
+
+    @GET("insumos/bajo-stock")
+    suspend fun getInsumosBajoStock(): Response<List<Insumo>>
+
+    @POST("insumos")
+    suspend fun agregarInsumo(@Body dto: InsumoDTO): Response<Insumo>
+
+    @PUT("insumos/{id}")
+    suspend fun actualizarInsumo(@Path("id") id: Long, @Body dto: InsumoDTO): Response<Void>  // ✅ Solo uno
+
+    @DELETE("insumos/{id}")
+    suspend fun eliminarInsumo(@Path("id") id: Long): Response<Void>
+
+    // ---PRODUCTOINSUMO---
+    @GET("producto-insumos/{productoId}")
+    suspend fun getRelacionesPorProducto(
+        @Path("productoId") productoId: Long
+    ): Response<List<ProductoInsumo>>
+
+    @POST("producto-insumos")
+    suspend fun agregarRelacion(
+        @Body productoInsumo: ProductoInsumo
+    ): Response<ProductoInsumo>
+
+    // --- MESEROS ---
+    @GET("meseros")
+    suspend fun getMeseros(): Response<List<Mesero>>
+
+    @POST("meseros/registrar")
+    suspend fun insertarMesero(@Body mesero: Mesero): Response<Mesero>
+
+    @PUT("meseros/{id}")
+    suspend fun actualizarMesero(
+        @Path("id") id: Long,
+        @Body mesero: Mesero
+    ): Response<Mesero>
+
+    @DELETE("meseros/{id}")
+    suspend fun eliminarMesero(@Path("id") id: Long): Response<Void>
+
+
+    // --- PIZZEROS ---
+    @GET("pizzeros")
+    suspend fun getPizzeros(): Response<List<Pizzero>>
+
+    @POST("pizzeros/registrar")
+    suspend fun insertarPizzero(@Body pizzero: Pizzero): Response<Pizzero>
+
+    @PUT("pizzeros/{id}")
+    suspend fun actualizarPizzero(
+        @Path("id") id: Long,
+        @Body pizzero: Pizzero
+    ): Response<Pizzero>
+
+    @DELETE("pizzeros/{id}")
+    suspend fun eliminarPizzero(@Path("id") id: Long): Response<Void>
 }
-
-

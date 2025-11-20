@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val adminService: AdministradorService,
-    private val adminViewModel: AdministradorViewModel? = null // ✅ opcional: se puede inyectar
+    private val adminViewModel: AdministradorViewModel? = null
 ) : ViewModel() {
 
     var loginState by mutableStateOf<LoginState>(LoginState.Idle)

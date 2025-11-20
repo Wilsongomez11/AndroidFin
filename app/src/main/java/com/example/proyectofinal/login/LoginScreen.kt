@@ -39,6 +39,7 @@ import com.example.proyectofinal.LoginResponse
 import com.example.proyectofinal.Model.Administrador
 import com.example.proyectofinal.R
 import com.example.proyectofinal.ViewModel.AdministradorViewModel
+import com.example.proyectofinal.ViewModel.MeseroViewModel
 import com.example.proyectofinal.ViewModel.ViewModelProvider.AuthViewModelFactory
 import com.example.proyectofinal.admin.AuthViewModel
 import com.example.proyectofinal.admin.LoginState
@@ -57,8 +58,8 @@ fun LoginScreen(
     val viewModel: AuthViewModel = viewModel(factory = factory)
     val context = LocalContext.current
 
-    // ⭐ NUEVO: traemos el AdministradorViewModel para guardar la sesión
-    val adminViewModel: AdministradorViewModel = viewModel()
+    // Crear instancia de MeseroViewModel
+    val meseroViewModel: MeseroViewModel = viewModel()
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -84,7 +85,7 @@ fun LoginScreen(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // 🎨 Fondo decorativo
+
         Image(
             painter = painterResource(id = R.drawable.pizza_logo),
             contentDescription = null,
@@ -129,7 +130,7 @@ fun LoginScreen(
                 modifier = Modifier.padding(bottom = 28.dp)
             )
 
-            // 💎 Tarjeta de login
+            // Tarjeta de login
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -141,7 +142,7 @@ fun LoginScreen(
                     modifier = Modifier.padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // 🧑 Usuario
+                    //  Usuario
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
@@ -150,7 +151,7 @@ fun LoginScreen(
                             Icon(
                                 Icons.Default.Person,
                                 null,
-                                tint = Color(0xFFFF9800)
+                                tint = Color(0xFF5E17EB)
                             )
                         },
                         singleLine = true,
@@ -158,12 +159,12 @@ fun LoginScreen(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFFF9800),
+                            focusedBorderColor = Color(0xFF5E17EB),
                             unfocusedBorderColor = Color.Gray,
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            cursorColor = Color(0xFFFF9800),
-                            focusedLabelColor = Color(0xFFFF9800),
+                            cursorColor = Color(0xFF5E17EB),
+                            focusedLabelColor = Color(0xFF5E17EB),
                             unfocusedLabelColor = Color.LightGray
                         ),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -171,18 +172,18 @@ fun LoginScreen(
 
                     Spacer(Modifier.height(20.dp))
 
-                    // 🔒 Contraseña
+                    //  Contraseña
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Contraseña") },
-                        leadingIcon = { Icon(Icons.Default.Lock, null, tint = Color(0xFFFF9800)) },
+                        leadingIcon = { Icon(Icons.Default.Lock, null, tint = Color(0xFF5E17EB)) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
                                     if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                     contentDescription = "Ver contraseña",
-                                    tint = Color(0xFFFF9800)
+                                    tint = Color(0xFF5E17EB)
                                 )
                             }
                         },
@@ -192,12 +193,12 @@ fun LoginScreen(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFFF9800),
+                            focusedBorderColor = Color(0xFF5E17EB),
                             unfocusedBorderColor = Color.Gray,
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            cursorColor = Color(0xFFFF9800),
-                            focusedLabelColor = Color(0xFFFF9800),
+                            cursorColor = Color(0xFF5E17EB),
+                            focusedLabelColor = Color(0xFF5E17EB),
                             unfocusedLabelColor = Color.LightGray
                         ),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
@@ -213,7 +214,7 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(55.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFF9800),
+                            containerColor = Color(0xFF5E17EB),
                             disabledContainerColor = Color(0x55FFFFFF),
                             contentColor = Color.White
                         )
@@ -254,22 +255,38 @@ fun LoginScreen(
                 Toast.LENGTH_SHORT
             ).show()
 
-            if (user.cargo.equals("ADMIN", ignoreCase = true) ||
-                user.cargo.equals("ADMINISTRADOR", ignoreCase = true)
-            ) {
-
-                adminViewModel.establecerAdministradorActual(
-                    Administrador(
-                        id = user.id,
-                        username = user.username,
-                        password = "", // no es necesario guardar la contraseña
-                        nombre = user.nombre,
-                        cargo = user.cargo
+            // Verificar el cargo del usuario
+            when {
+                user.cargo.equals("ADMIN", ignoreCase = true) ||
+                        user.cargo.equals("ADMINISTRADOR", ignoreCase = true) -> {
+                    // Establecer administrador actual
+                    adminViewModel.establecerAdministradorActual(
+                        Administrador(
+                            id = user.id,
+                            username = user.username,
+                            password = "",
+                            nombre = user.nombre,
+                            cargo = user.cargo
+                        )
                     )
-                )
-            }
+                    onLoginSuccess(user)
+                }
 
-            onLoginSuccess(user)
+                user.cargo.equals("MESERO", ignoreCase = true) -> {
+                    // Establecer mesero actual
+                    meseroViewModel.establecerMeseroActual(
+                        id = user.id,
+                        nombre = user.nombre
+                    )
+                    // Navegar a la pantalla de mesero
+                    navController.navigate("meseroHomeScreen")
+                }
+
+                else -> {
+                    // Otro tipo de usuario
+                    onLoginSuccess(user)
+                }
+            }
         }
     }
 }

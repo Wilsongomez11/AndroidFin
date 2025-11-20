@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -25,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.Model.Cliente
 import com.example.proyectofinal.Model.DetallePedido
+import com.example.proyectofinal.Model.Mesa
 import com.example.proyectofinal.Model.Pedido
 import com.example.proyectofinal.Model.Producto
 import com.example.proyectofinal.ProductoViewModel
@@ -33,21 +33,62 @@ import com.example.proyectofinal.ViewModel.PedidoViewModel
 @Composable
 fun CrearPedidoScreen(
     navController: NavHostController,
+    mesaId: Int? = null,
     pedidoViewModel: PedidoViewModel = viewModel(),
     productoViewModel: ProductoViewModel = viewModel()
 ) {
     val productos by productoViewModel.productos.collectAsState()
     val mensaje by pedidoViewModel.mensaje.collectAsState()
+    val errorDetallado by pedidoViewModel.errorDetallado.collectAsState()
+    val pedidos by pedidoViewModel.pedidos.collectAsState()
+
+    // Campo mesa como texto, pero la mesa real será un objeto Mesa
+    var mesaTexto by remember { mutableStateOf(mesaId?.toString() ?: "") }
+    val mesaEsFija = mesaId != null
 
     val carrito = remember { mutableStateListOf<DetallePedido>() }
-    var mesa by remember { mutableStateOf("") }
     var clienteIdText by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) { productoViewModel.obtenerProductos() }
+    // Agregar SnackbarHost para mostrar errores
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val total = remember { derivedStateOf { carrito.sumOf { it.cantidad * it.precioUnitario } } }
+    LaunchedEffect(Unit) {
+        productoViewModel.obtenerProductos()
+        pedidoViewModel.obtenerPedidos()
+    }
 
-    Scaffold { padding ->
+    // Mostrar errores detallados en Snackbar
+    LaunchedEffect(errorDetallado) {
+        errorDetallado?.let { error ->
+            snackbarHostState.showSnackbar(
+                message = error,
+                duration = SnackbarDuration.Long
+            )
+            pedidoViewModel.limpiarError()
+        }
+    }
+
+    val total = remember {
+        derivedStateOf { carrito.sumOf { it.cantidad * it.precioUnitario } }
+    }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = if (data.visuals.message.contains("✅")) {
+                        Color(0xFF4CAF50)
+                    } else {
+                        Color(0xFFD32F2F)
+                    },
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,29 +104,34 @@ fun CrearPedidoScreen(
                 Text(
                     text = "Nuevo Pedido",
                     color = Color.White,
-                    fontSize = 24.sp,
+                    fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
                 Spacer(Modifier.height(10.dp))
 
+                // Campo Mesa
                 OutlinedTextField(
-                    value = mesa,
-                    onValueChange = { mesa = it },
-                    label = { Text("Mesa (opcional)", color = Color(0xFFD1C4E9)) },
+                    value = mesaTexto,
+                    onValueChange = { if (!mesaEsFija) mesaTexto = it },
+                    label = { Text("Mesa", color = Color(0xFFD1C4E9)) },
+                    enabled = !mesaEsFija,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                        .padding(bottom = 10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.White,
                         unfocusedBorderColor = Color.Gray,
-                        cursorColor = Color.White,
+                        disabledBorderColor = Color.LightGray,
                         focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        unfocusedTextColor = Color.White,
+                        disabledTextColor = Color.Gray,
+                        cursorColor = Color.White
                     )
                 )
 
+                // Cliente opcional
                 OutlinedTextField(
                     value = clienteIdText,
                     onValueChange = { clienteIdText = it },
@@ -103,6 +149,7 @@ fun CrearPedidoScreen(
                     )
                 )
 
+                // Lista de productos
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.weight(1f)
@@ -114,86 +161,134 @@ fun CrearPedidoScreen(
 
                 Spacer(Modifier.height(16.dp))
 
+                // Carrito
                 if (carrito.isNotEmpty()) {
                     Text(
                         text = "Productos agregados:",
                         color = Color.White,
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    val carritoListState = rememberLazyListState()
-                    LaunchedEffect(carrito.size) {
-                        if (carrito.isNotEmpty()) {
-                            carritoListState.animateScrollToItem(carrito.size - 1)
-                        }
-                    }
+
                     LazyColumn(
-                        state = carritoListState,
                         modifier = Modifier
                             .height(180.dp)
                             .padding(bottom = 10.dp)
                     ) {
                         items(carrito) { detalle ->
-                            CarritoItem(detalle, onEliminar = { carrito.remove(detalle) })
+                            CarritoItem(detalle) { carrito.remove(detalle) }
                         }
                     }
                 }
 
+                // Total
                 Text(
                     text = "Total: $${String.format("%.2f", total.value)}",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(12.dp))
 
+                // BOTÓN REGISTRAR PEDIDO
                 Button(
                     onClick = {
-                        if (carrito.isNotEmpty()) {
-                            val pedido = Pedido(
+                        if (carrito.isEmpty()) {
+
+                            return@Button
+                        }
+
+                        val clienteObj =
+                            clienteIdText.toLongOrNull()?.let { Cliente(id = it) }
+
+
+                        val mesaNumero = mesaId ?: mesaTexto.toIntOrNull()
+                        val mesaObj = mesaNumero?.let { Mesa(id = it.toLong()) }
+
+
+                        val pedidoExistente = pedidos.find { pedido ->
+                            val idMesaPedido = pedido.mesa?.id?.toInt()
+                            idMesaPedido == mesaNumero && pedido.estado != "Pagado"
+                        }
+
+                        if (pedidoExistente != null) {
+
+                            val detallesActualizados = pedidoExistente.detalles.toMutableList()
+
+                            carrito.forEach { nuevo ->
+                                val viejo =
+                                    detallesActualizados.find { it.producto.id == nuevo.producto.id }
+
+                                if (viejo != null) {
+                                    val index = detallesActualizados.indexOf(viejo)
+                                    detallesActualizados[index] =
+                                        viejo.copy(cantidad = viejo.cantidad + nuevo.cantidad)
+                                } else {
+                                    detallesActualizados.add(nuevo)
+                                }
+                            }
+
+                            val nuevoTotal =
+                                detallesActualizados.sumOf { it.cantidad * it.precioUnitario }
+
+                            val pedidoActualizado = pedidoExistente.copy(
+                                mesa = pedidoExistente.mesa ?: mesaObj,
+                                total = nuevoTotal,
+                                cliente = clienteObj ?: pedidoExistente.cliente,
+                                detalles = detallesActualizados
+                            )
+
+                            pedidoViewModel.actualizarPedido(pedidoActualizado) { resultado ->
+                                if (resultado.contains("\u2705")) {
+                                    carrito.clear()
+                                    navController.popBackStack()
+                                }
+
+                            }
+
+                        } else {
+
+                            val pedidoNuevo = Pedido(
                                 estado = "Pendiente",
                                 total = total.value,
-                                mesa = mesa.ifBlank { null },
-                                cliente = clienteIdText.toLongOrNull()?.let { Cliente(id = it) },
+                                mesa = mesaObj,
+                                cliente = clienteObj,
+                                mesero = null,
                                 detalles = carrito.toList()
                             )
 
-                            pedidoViewModel.crearPedido(pedido) {
-                                carrito.clear()
-                                navController.navigate("pedidos") {
-                                    popUpTo("pedidos") { inclusive = true }
+                            pedidoViewModel.crearPedido(pedidoNuevo) { resultado ->
+                                if (resultado.contains("\u2705")) {
+                                    carrito.clear()
+                                    pedidoViewModel.obtenerPedidos()
+
+                                    // Volver a la pantalla de mesas
+                                    navController.navigate("mesas") {
+                                        popUpTo("mesas") { inclusive = true }
+                                    }
                                 }
+                                // Los errores se muestran automáticamente en el Snackbar
                             }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
-                    modifier = Modifier.fillMaxWidth().height(55.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Text("Registrar Pedido", color = Color.White, fontSize = 18.sp)
                 }
 
-                Spacer(Modifier.height(8.dp))
-
-                Button(
-                    onClick = { navController.popBackStack() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E1E)),
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Text("Volver", color = Color.White)
-                }
-
-                if (mensaje.isNotEmpty()) {
+                // Mostrar mensaje general (si existe)
+                if (mensaje.isNotEmpty() && !mensaje.contains("Stock insuficiente")) {
                     Text(
                         mensaje,
                         color = Color.Yellow,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 8.dp)
+                        modifier = Modifier.padding(top = 8.dp)
                     )
                 }
             }
@@ -217,82 +312,69 @@ fun ProductoCard(producto: Producto, carrito: MutableList<DetallePedido>) {
         ) {
             Text(producto.nombre, color = Color.White, fontWeight = FontWeight.Bold)
             Text("Precio: $${producto.precio}", color = Color.LightGray)
-            Text(
-                "Disponibles: ${producto.cantidad} unidades",
-                color = Color(0xFFFFC107),
-                fontSize = 13.sp
-            )
+            Text("Disponibles: ${producto.cantidad}", color = Color(0xFFFFC107), fontSize = 13.sp)
 
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
                     value = cantidad,
                     onValueChange = { cantidad = it },
-                    label = {
-                        Text("Cantidad", color = Color(0xFFD1C4E9), fontSize = 13.sp)
-                    },
+                    label = { Text("Cant.", color = Color(0xFFD1C4E9)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
                     textStyle = TextStyle(
                         color = Color.White,
-                        fontSize = 20.sp,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 26.sp
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center
                     ),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier
                         .width(110.dp)
-                        .height(64.dp)
-                        .padding(vertical = 2.dp),
+                        .height(60.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.White,
                         unfocusedBorderColor = Color.Gray,
                         cursorColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(12.dp)
+                    )
                 )
 
                 Button(
                     onClick = {
                         val cant = cantidad.toIntOrNull()
-                        if (cant != null && cant > 0) {
-                            if (cant > producto.cantidad) {
-                                advertencia = "No hay suficientes unidades disponibles"
+                        if (cant == null || cant <= 0) return@Button
+
+                        if (cant > producto.cantidad) {
+                            advertencia = "No hay suficientes unidades"
+                        } else {
+                            val existente = carrito.find { it.producto.id == producto.id }
+                            if (existente != null) {
+                                val index = carrito.indexOf(existente)
+                                carrito[index] =
+                                    existente.copy(cantidad = existente.cantidad + cant)
                             } else {
-                                val existente = carrito.find { it.producto.id == producto.id }
-                                if (existente != null) {
-                                    val index = carrito.indexOf(existente)
-                                    carrito[index] = existente.copy(cantidad = existente.cantidad + cant)
-                                } else {
-                                    carrito.add(
-                                        DetallePedido(
-                                            producto = producto,
-                                            cantidad = cant,
-                                            precioUnitario = producto.precio
-                                        )
+                                carrito.add(
+                                    DetallePedido(
+                                        producto = producto,
+                                        cantidad = cant,
+                                        precioUnitario = producto.precio
                                     )
-                                }
-                                advertencia = ""
-                                cantidad = ""
+                                )
                             }
+                            cantidad = ""
+                            advertencia = ""
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
                     modifier = Modifier.height(56.dp)
                 ) {
-                    Text("Agregar", color = Color.White, fontSize = 14.sp)
+                    Text("Agregar", color = Color.White)
                 }
             }
 
             if (advertencia.isNotEmpty()) {
-                Text(
-                    text = advertencia,
-                    color = Color(0xFFFFC107),
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                Text(advertencia, color = Color(0xFFFFC107), fontSize = 13.sp)
             }
         }
     }
@@ -315,16 +397,15 @@ fun CarritoItem(detalle: DetallePedido, onEliminar: () -> Unit) {
             Column {
                 Text(detalle.producto.nombre, color = Color.White, fontWeight = FontWeight.Bold)
                 Text(
-                    "x${detalle.cantidad}  •  Subtotal: $${String.format("%.2f", detalle.cantidad * detalle.precioUnitario)}",
+                    "x${detalle.cantidad}  -  $${detalle.cantidad * detalle.precioUnitario}",
                     color = Color.LightGray,
                     fontSize = 13.sp
                 )
             }
+
             IconButton(onClick = onEliminar) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
+                Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
             }
         }
     }
 }
-
-

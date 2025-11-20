@@ -34,8 +34,18 @@ interface AdministradorService {
     @PUT("pedidos/{id}/estado")
     suspend fun actualizarEstadoPedido(
         @Path("id") id: Long,
-        @Query("estado") nuevoEstado: String
+        @Query("estado") estado: String
     ): Response<Void>
+
+    @PUT("pedidos/{id}/devolver")
+    suspend fun devolverPedido(
+        @Path("id") id: Long,
+        @Body devolucion: DevolucionRequest
+    ): Response<Void>
+
+
+    @GET("caja/hoy")
+    suspend fun getCajaDelDia(): Caja
 
 
     // --- ADMINISTRADORES ---
@@ -172,4 +182,13 @@ interface AdministradorService {
 
     @GET("insumos/bajo-stock")
     suspend fun getInsumosBajoStock(): Response<List<Insumo>>
+
+    // ---PAGOS---
+    // --- PAGOS ---
+    @POST("pagos/registrar")
+    suspend fun registrarPago(
+        @Query("pedidoId") pedidoId: Long,
+        @Query("montoPagado") montoPagado: Double,
+        @Query("adminId") adminId: Long
+    ): Map<String, Any>
 }

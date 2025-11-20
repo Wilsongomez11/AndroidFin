@@ -1,7 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 package com.example.proyectofinal
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,13 +26,13 @@ fun AgregarPersonalScreen(
     var mensaje by remember { mutableStateOf("") }
 
     val campoColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = Color(0xFFFF9800),
+        focusedBorderColor = Color(0xFF7209B7),
         unfocusedBorderColor = Color.Gray,
         focusedTextColor = Color.White,
         unfocusedTextColor = Color.White,
-        focusedLabelColor = Color(0xFFFF9800),
+        focusedLabelColor = Color(0xFF7209B7),
         unfocusedLabelColor = Color.LightGray,
-        cursorColor = Color(0xFFFF9800)
+        cursorColor = Color(0xFF7209B7)
     )
 
     Box(
@@ -56,7 +54,7 @@ fun AgregarPersonalScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "👥 Agregar Personal",
+                "\uD83D\uDC65 Agregar Personal",
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
@@ -70,12 +68,6 @@ fun AgregarPersonalScreen(
                     ButtonElegante("Pizzero", onClick = { formularioActivo = "Pizzero" })
                     Spacer(modifier = Modifier.height(16.dp))
                     ButtonElegante("Admin", onClick = { formularioActivo = "Admin" })
-                    Spacer(modifier = Modifier.height(40.dp))
-                    ButtonVolver {
-                        navController.navigate("personalMenu") {
-                            popUpTo("personalMenu") { inclusive = true }
-                        }
-                    }
                 }
 
                 "Mesero" -> {
@@ -85,8 +77,7 @@ fun AgregarPersonalScreen(
                             viewModel.guardarMesero(nombre, telefono, correo, username, password) {
                                 mensaje = it
                             }
-                        },
-                        onVolver = { formularioActivo = "" }
+                        }
                     )
                 }
 
@@ -97,8 +88,7 @@ fun AgregarPersonalScreen(
                             viewModel.guardarPizzero(nombre, telefono, direccion, username, password) {
                                 mensaje = it
                             }
-                        },
-                        onVolver = { formularioActivo = "" }
+                        }
                     )
                 }
 
@@ -109,8 +99,7 @@ fun AgregarPersonalScreen(
                             viewModel.guardarAdministrador(nombre, username, password, cargo) {
                                 mensaje = it
                             }
-                        },
-                        onVolver = { formularioActivo = "" }
+                        }
                     )
                 }
             }
@@ -131,15 +120,14 @@ fun ButtonElegante(texto: String, onClick: () -> Unit) {
             .padding(8.dp)
             .size(120.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1B1F))
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB))
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val icono = when {
-                texto.contains("Mesero", ignoreCase = true) -> "🍽️"
-                texto.contains("Pizzero", ignoreCase = true) -> "🍕"
-                texto.contains("Admin", ignoreCase = true) -> "🧑‍💼"
-                texto.contains("Volver", ignoreCase = true) -> "↩️"
-                else -> "➕"
+                texto.contains("Mesero", ignoreCase = true) -> "\uD83C\uDF7D\uFE0F"
+                texto.contains("Pizzero", ignoreCase = true) -> "\uD83C\uDF55"
+                texto.contains("Admin", ignoreCase = true) -> "\uD83D\uDCBC"
+                else -> "\u2795"
             }
             Text(icono, fontSize = 28.sp)
             Spacer(modifier = Modifier.height(6.dp))
@@ -149,39 +137,9 @@ fun ButtonElegante(texto: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun ButtonVolver(onClick: () -> Unit = {}) {
-    val context = LocalContext.current
-
-    Button(
-        onClick = {
-            try {
-                onClick()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(context, "No se pudo volver", Toast.LENGTH_SHORT).show()
-            }
-        },
-        modifier = Modifier
-            .padding(8.dp)
-            .size(120.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1C1B1F))
-    ) {
-        Spacer(Modifier.height(20.dp))
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("↩️", fontSize = 28.sp)
-            Spacer(modifier = Modifier.height(6.dp))
-            Text("Volver", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-        }
-    }
-}
-
-@Composable
 fun FormularioMesero(
     campoColors: TextFieldColors,
-    onGuardar: (String, String, String, String, String) -> Unit,
-    onVolver: () -> Unit
+    onGuardar: (String, String, String, String, String) -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
@@ -189,7 +147,7 @@ fun FormularioMesero(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    Text("🍽️ Nuevo Mesero", color = Color.White, fontSize = 22.sp)
+    Text("\uD83C\uDF7D\uFE0F Nuevo Mesero", color = Color.White, fontSize = 22.sp)
     Spacer(modifier = Modifier.height(16.dp))
 
     OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth(), colors = campoColors)
@@ -204,15 +162,12 @@ fun FormularioMesero(
             onGuardar(nombre, telefono, correo, username, password)
         }
     }
-    Spacer(modifier = Modifier.height(10.dp))
-    ButtonVolver(onVolver)
 }
 
 @Composable
 fun FormularioPizzero(
     campoColors: TextFieldColors,
-    onGuardar: (String, String, String, String, String) -> Unit,
-    onVolver: () -> Unit
+    onGuardar: (String, String, String, String, String) -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
@@ -220,7 +175,7 @@ fun FormularioPizzero(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    Text("🍕 Nuevo Pizzero", color = Color.White, fontSize = 22.sp)
+    Text("\uD83C\uDF55 Nuevo Pizzero", color = Color.White, fontSize = 22.sp)
     Spacer(modifier = Modifier.height(16.dp))
 
     OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth(), colors = campoColors)
@@ -235,22 +190,19 @@ fun FormularioPizzero(
             onGuardar(nombre, telefono, direccion, username, password)
         }
     }
-    Spacer(modifier = Modifier.height(10.dp))
-    ButtonVolver(onVolver)
 }
 
 @Composable
 fun FormularioAdmin(
     campoColors: TextFieldColors,
-    onGuardar: (String, String, String, String) -> Unit,
-    onVolver: () -> Unit
+    onGuardar: (String, String, String, String) -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var cargo by remember { mutableStateOf("") }
 
-    Text(" Nuevo Administrador", color = Color.White, fontSize = 22.sp)
+    Text("\uD83D\uDCBC Nuevo Administrador", color = Color.White, fontSize = 22.sp)
     Spacer(modifier = Modifier.height(16.dp))
 
     OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth(), colors = campoColors)
@@ -264,43 +216,4 @@ fun FormularioAdmin(
             onGuardar(nombre, username, password, cargo)
         }
     }
-    Spacer(modifier = Modifier.height(10.dp))
-    ButtonVolver(onVolver)
 }
-@Composable
-fun BotonCuadro(
-    texto: String,
-    icono: androidx.compose.ui.graphics.vector.ImageVector,
-    colorFondo: Color = Color(0xFF1E1E1E),
-    onClick: () -> Unit
-) {
-    ElevatedButton(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth(0.85f)
-            .height(70.dp),
-        shape = RoundedCornerShape(18.dp),
-        colors = ButtonDefaults.elevatedButtonColors(containerColor = colorFondo),
-        elevation = ButtonDefaults.elevatedButtonElevation(8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = icono,
-                contentDescription = texto,
-                tint = Color(0xFFFF9800),
-                modifier = Modifier.size(30.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                texto,
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    }
-}
-

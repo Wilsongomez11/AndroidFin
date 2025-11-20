@@ -50,14 +50,14 @@ class InsumoViewModel : ViewModel() {
                     if (nuevo != null) {
                         _insumos.value = _insumos.value + nuevo
                     }
-                    onResult("✅ Insumo agregado correctamente")
+                    onResult(" Insumo agregado correctamente")
                 } else {
-                    onResult("❌ Error: ${response.code()}")
+                    onResult(" Error: ${response.code()}")
                 }
             } catch (e: HttpException) {
-                onResult("❌ Error HTTP: ${e.code()}")
+                onResult(" Error HTTP: ${e.code()}")
             } catch (e: Exception) {
-                onResult("⚠️ Error: ${e.localizedMessage}")
+                onResult("Error: ${e.localizedMessage}")
             }
         }
     }
@@ -77,7 +77,7 @@ class InsumoViewModel : ViewModel() {
                     _insumos.value = _insumos.value.map {
                         if (it.id == id) insumo else it
                     }
-                    onResult("Insumo actualizado correctamente ✅")
+                    onResult("Insumo actualizado correctamente ")
                 } else {
                     onResult("Error ${response.code()}")
                 }
@@ -94,7 +94,7 @@ class InsumoViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     // Elimina localmente sin recargar toda la lista
                     _insumos.value = _insumos.value.filterNot { it.id == id }
-                    onResult("Insumo eliminado correctamente ✅")
+                    onResult("Insumo eliminado correctamente ")
                 } else {
                     onResult("Error ${response.code()}")
                 }

@@ -2,8 +2,8 @@ package com.example.proyectofinal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.Api.ApiClient
-import com.example.proyectofinal.Api.ProductoInsumoService
 import com.example.proyectofinal.Model.*
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import retrofit2.HttpException
 
 class ProductoViewModel : ViewModel() {
 
-    private val productoInsumoService: ProductoInsumoService = ApiClient.productoInsumoService
+    private val productoInsumoService: ApiService = ApiClient.apiService
 
     val relaciones = MutableStateFlow<List<ProductoInsumo>>(emptyList())
     private val _productos = MutableStateFlow<List<Producto>>(emptyList())
@@ -25,7 +25,7 @@ class ProductoViewModel : ViewModel() {
     fun obtenerProductos() {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.getProductos()
+                val response = ApiClient.administradorService.getProductos()
                 if (response.isSuccessful) {
                     _productos.value = response.body() ?: emptyList()
                 } else {
@@ -80,7 +80,7 @@ class ProductoViewModel : ViewModel() {
                     return@launch
                 }
 
-                val response = ApiClient.apiService.eliminarProducto(id)
+                val response = ApiClient.administradorService.eliminarProducto(id)
                 if (response.isSuccessful) {
                     // Elimina directamente el producto de la lista local
                     _productos.value = _productos.value.filterNot { it.id == id }
@@ -97,7 +97,7 @@ class ProductoViewModel : ViewModel() {
     fun fabricarProducto(id: Long, cantidad: Int, onResult: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.fabricarProducto(id, cantidad)
+                val response = ApiClient.administradorService.fabricarProducto(id, cantidad)
                 if (response.isSuccessful) {
                     onResult("Producto fabricado correctamente")
                     obtenerProductos()

@@ -48,7 +48,7 @@ fun VerInsumosScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "📋 Lista de Insumos",
+                text = "\uD83D\uDCCB Lista de Insumos",
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
@@ -67,10 +67,8 @@ fun VerInsumosScreen(
                     InsumoCardEditable(
                         insumo = insumo,
                         onGuardar = { actualizado ->
-
                             viewModel.actualizarInsumo(actualizado.id, actualizado) { resultado ->
                                 mensaje = resultado
-
                                 viewModel.obtenerInsumos()
                             }
                         },
@@ -84,22 +82,8 @@ fun VerInsumosScreen(
                 }
             }
 
-
             if (mensaje.isNotEmpty()) {
                 Text(text = mensaje, color = Color.White, fontSize = 14.sp)
-            }
-
-            Button(
-                onClick = {
-                    if (!navController.navigateUp()) {
-                        navController.navigate(returnTo) { launchSingleTop = true }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E1E)),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.height(60.dp).width(140.dp)
-            ) {
-                Text("↩️ Volver", color = Color.White, fontSize = 16.sp)
             }
         }
     }
@@ -115,7 +99,6 @@ fun InsumoCardEditable(
     var unidad by remember { mutableStateOf(insumo.unidadMedida) }
     var cantidadActual by remember { mutableStateOf(insumo.cantidadActual.toString()) }
     var cantidadMinima by remember { mutableStateOf(insumo.cantidadMinima.toString()) }
-
     var modoEditar by remember { mutableStateOf(false) }
     var mostrarConfirmacion by remember { mutableStateOf(false) }
 
@@ -139,7 +122,7 @@ fun InsumoCardEditable(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                "📦 ${insumo.nombre}",
+                "\uD83D\uDCE6 ${insumo.nombre}",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -193,7 +176,7 @@ fun InsumoCardEditable(
                             onGuardar(actualizado)
                             modoEditar = false
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7E57C2)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
                         modifier = Modifier.weight(1f)
                     ) { Text("Guardar", color = Color.White) }
 
@@ -230,13 +213,10 @@ fun InsumoCardEditable(
         }
     }
 
-    // Diálogo de confirmación
     if (mostrarConfirmacion) {
         AlertDialog(
             onDismissRequest = { mostrarConfirmacion = false },
-            title = {
-                Text("Confirmar eliminación", color = Color.White)
-            },
+            title = { Text("Confirmar eliminación", color = Color.White) },
             text = {
                 Text(
                     "¿Seguro que deseas eliminar el insumo \"${insumo.nombre}\"?",
@@ -261,4 +241,3 @@ fun InsumoCardEditable(
         )
     }
 }
-

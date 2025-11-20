@@ -54,7 +54,7 @@ fun InsumosScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "📦 Gestión de Insumos",
+                text = "\uD83D\uDCE6 Gestión de Insumos",
                 fontSize = 26.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -94,56 +94,35 @@ fun InsumosScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Fila con los botones Volver y Agregar
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Button(
+                onClick = {
+                    if (nombre.isBlank() || unidad.isBlank() || cantidadActual.isBlank() || cantidadMinima.isBlank()) {
+                        mensaje = "\u26A0\uFE0F Completa todos los campos"
+                        return@Button
+                    }
+
+                    viewModel.agregarInsumo(
+                        nombre,
+                        unidad,
+                        cantidadActual.toInt(),
+                        cantidadMinima.toInt()
+                    ) {
+                        mensaje = it
+                        if (it.contains("correctamente")) {
+                            nombre = ""
+                            unidad = ""
+                            cantidadActual = ""
+                            cantidadMinima = ""
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .height(60.dp)
+                    .width(160.dp)
             ) {
-                Button(
-                    onClick = {
-                        if (!navController.navigateUp()) {
-                            navController.navigate(returnTo) { launchSingleTop = true }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E1E)),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier
-                        .height(60.dp)
-                        .width(140.dp)
-                ) {
-                    Text("↩️ Volver", color = Color.White, fontSize = 16.sp)
-                }
-
-                Button(
-                    onClick = {
-                        if (nombre.isBlank() || unidad.isBlank() || cantidadActual.isBlank() || cantidadMinima.isBlank()) {
-                            mensaje = "⚠️ Completa todos los campos"
-                            return@Button
-                        }
-
-                        viewModel.agregarInsumo(
-                            nombre,
-                            unidad,
-                            cantidadActual.toInt(),
-                            cantidadMinima.toInt()
-                        ) {
-                            mensaje = it
-                            if (it.contains("correctamente")) {
-                                nombre = ""
-                                unidad = ""
-                                cantidadActual = ""
-                                cantidadMinima = ""
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E1E)),
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier
-                        .height(60.dp)
-                        .width(140.dp)
-                ) {
-                    Text("➕ Agregar", color = Color.White, fontSize = 16.sp)
-                }
+                Text("\u2795 Agregar", color = Color.White, fontSize = 16.sp)
             }
 
             if (mensaje.isNotEmpty()) {

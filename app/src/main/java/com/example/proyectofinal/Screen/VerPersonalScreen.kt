@@ -34,7 +34,6 @@ fun VerPersonalScreen(
     val error by viewModel.error.collectAsState()
     var mensaje by remember { mutableStateOf("") }
 
-    // Cargar datos
     LaunchedEffect(Unit) {
         viewModel.cargarAdministradores()
         viewModel.cargarMeseros()
@@ -65,7 +64,7 @@ fun VerPersonalScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "👥 Lista de Personal",
+                text = "\uD83D\uDC65 Lista de Personal",
                 fontSize = 24.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -86,17 +85,13 @@ fun VerPersonalScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 if (personal.isEmpty()) {
-                    item {
-                        Text("Cargando personal...", color = Color.White)
-                    }
+                    item { Text("Cargando personal...", color = Color.White) }
                 } else {
-                    items(
-                        items = personal,
-                        key = { "${it.first ?: 0}_${it.third}" }
-                    ) { persona ->
+                    items(personal, key = { "${it.first ?: 0}_${it.third}" }) { persona ->
                         Box(
-                            modifier = Modifier
-                                .animateContentSize(animationSpec = spring(dampingRatio = 0.8f, stiffness = 200f))
+                            modifier = Modifier.animateContentSize(
+                                animationSpec = spring(dampingRatio = 0.8f, stiffness = 200f)
+                            )
                         ) {
                             PersonalEditableCard(
                                 id = persona.first,
@@ -108,18 +103,6 @@ fun VerPersonalScreen(
                         }
                     }
                 }
-            }
-
-
-            Button(
-                onClick = { navController.navigate("personalMenu") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E1E1E)),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier
-                    .height(60.dp)
-                    .width(140.dp)
-            ) {
-                Text("↩️ Volver", color = Color.White, fontSize = 16.sp)
             }
         }
     }
@@ -142,9 +125,6 @@ fun PersonalEditableCard(
     var direccion by rememberSaveable(id) { mutableStateOf("") }
     var visible by remember { mutableStateOf(true) }
 
-    val fondoDegradado = Brush.verticalGradient(
-        listOf(Color(0xFF3A0CA3), Color(0xFF7209B7))
-    )
     AnimatedVisibility(visible = visible) {
         Box(
             modifier = Modifier
@@ -152,10 +132,7 @@ fun PersonalEditableCard(
                 .shadow(10.dp, RoundedCornerShape(20.dp))
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF3A0CA3), // morado oscuro
-                            Color(0xFF7209B7)  // morado brillante
-                        )
+                        listOf(Color(0xFF3A0CA3), Color(0xFF7209B7))
                     ),
                     shape = RoundedCornerShape(20.dp)
                 )
@@ -167,17 +144,8 @@ fun PersonalEditableCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (!enEdicion) {
-                    Text(
-                        text = nombre,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Text(
-                        text = cargo,
-                        color = Color(0xFFD1C4E9),
-                        fontSize = 14.sp
-                    )
+                    Text(nombre, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(cargo, color = Color(0xFFD1C4E9), fontSize = 14.sp)
 
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -185,9 +153,7 @@ fun PersonalEditableCard(
                     ) {
                         Button(
                             onClick = { enEdicion = true },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF5E17EB) // violeta puro
-                            ),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
                             shape = RoundedCornerShape(20.dp),
                             modifier = Modifier
                                 .height(42.dp)
@@ -208,9 +174,7 @@ fun PersonalEditableCard(
                                     visible = false
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFD32F2F) // rojo intenso
-                            ),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
                             shape = RoundedCornerShape(20.dp),
                             modifier = Modifier
                                 .height(42.dp)
@@ -220,161 +184,115 @@ fun PersonalEditableCard(
                         }
                     }
                 } else {
-                    Text(text = "Editando $cargo", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(
+                        text = "Editando $cargo",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
 
-                        OutlinedTextField(
-                            value = nombreEditado,
-                            onValueChange = { nombreEditado = it },
-                            label = { Text("Nombre", color = Color.LightGray) },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color.Gray,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    val colorCampo = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.Gray,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
 
-                        when (cargo) {
-                            "Administrador" -> {
-                                OutlinedTextField(
-                                    value = username,
-                                    onValueChange = { username = it },
-                                    label = { Text("Usuario", color = Color.LightGray) },
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color.White,
-                                        unfocusedBorderColor = Color.Gray,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
-                                    ),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                OutlinedTextField(
-                                    value = password,
-                                    onValueChange = { password = it },
-                                    label = { Text("Contraseña", color = Color.LightGray) },
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color.White,
-                                        unfocusedBorderColor = Color.Gray,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
-                                    ),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                    OutlinedTextField(
+                        value = nombreEditado,
+                        onValueChange = { nombreEditado = it },
+                        label = { Text("Nombre", color = Color.LightGray) },
+                        colors = colorCampo,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                            "Mesero" -> {
-                                OutlinedTextField(
-                                    value = telefono,
-                                    onValueChange = { telefono = it },
-                                    label = { Text("Teléfono", color = Color.LightGray) },
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color.White,
-                                        unfocusedBorderColor = Color.Gray,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
-                                    ),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                OutlinedTextField(
-                                    value = correo,
-                                    onValueChange = { correo = it },
-                                    label = { Text("Correo", color = Color.LightGray) },
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color.White,
-                                        unfocusedBorderColor = Color.Gray,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
-                                    ),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-                            "Pizzero" -> {
-                                OutlinedTextField(
-                                    value = telefono,
-                                    onValueChange = { telefono = it },
-                                    label = { Text("Teléfono", color = Color.LightGray) },
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color.White,
-                                        unfocusedBorderColor = Color.Gray,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
-                                    ),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                OutlinedTextField(
-                                    value = direccion,
-                                    onValueChange = { direccion = it },
-                                    label = { Text("Dirección", color = Color.LightGray) },
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedBorderColor = Color.White,
-                                        unfocusedBorderColor = Color.Gray,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
-                                    ),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                    when (cargo) {
+                        "Administrador" -> {
+                            OutlinedTextField(
+                                value = username,
+                                onValueChange = { username = it },
+                                label = { Text("Usuario", color = Color.LightGray) },
+                                colors = colorCampo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = password,
+                                onValueChange = { password = it },
+                                label = { Text("Contraseña", color = Color.LightGray) },
+                                colors = colorCampo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Button(
-                                onClick = {
-                                    if (id != null) {
-                                        when (cargo) {
-                                            "Administrador" -> viewModel.editarAdministrador(
-                                                id,
-                                                nombreEditado,
-                                                cargo,
-                                                password,
-                                                username,
-                                                onResult
-                                            )
+                        "Mesero" -> {
+                            OutlinedTextField(
+                                value = telefono,
+                                onValueChange = { telefono = it },
+                                label = { Text("Teléfono", color = Color.LightGray) },
+                                colors = colorCampo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = correo,
+                                onValueChange = { correo = it },
+                                label = { Text("Correo", color = Color.LightGray) },
+                                colors = colorCampo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
-                                            "Mesero" -> viewModel.editarMesero(
-                                                id,
-                                                nombreEditado,
-                                                telefono,
-                                                correo,
-                                                username,
-                                                password,
-                                                onResult
-                                            )
+                        "Pizzero" -> {
+                            OutlinedTextField(
+                                value = telefono,
+                                onValueChange = { telefono = it },
+                                label = { Text("Teléfono", color = Color.LightGray) },
+                                colors = colorCampo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = direccion,
+                                onValueChange = { direccion = it },
+                                label = { Text("Dirección", color = Color.LightGray) },
+                                colors = colorCampo,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
 
-                                            "Pizzero" -> viewModel.editarPizzero(
-                                                id,
-                                                nombreEditado,
-                                                telefono,
-                                                direccion,
-                                                username,
-                                                password,
-                                                onResult
-                                            )
-                                        }
-                                        enEdicion = false
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Button(
+                            onClick = {
+                                if (id != null) {
+                                    when (cargo) {
+                                        "Administrador" -> viewModel.editarAdministrador(
+                                            id, nombreEditado, cargo, password, username, onResult
+                                        )
+                                        "Mesero" -> viewModel.editarMesero(
+                                            id, nombreEditado, telefono, correo, username, password, onResult
+                                        )
+                                        "Pizzero" -> viewModel.editarPizzero(
+                                            id, nombreEditado, telefono, direccion, username, password, onResult
+                                        )
                                     }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFF1E88E5
-                                    )
-                                ),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Text("Guardar", color = Color.White)
-                            }
+                                    enEdicion = false
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("Guardar", color = Color.White)
+                        }
 
-                            Button(
-                                onClick = { enEdicion = false },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Text("Cancelar", color = Color.White)
-                            }
+                        Button(
+                            onClick = { enEdicion = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("Cancelar", color = Color.White)
                         }
                     }
                 }
             }
         }
     }
+}

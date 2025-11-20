@@ -1,6 +1,5 @@
 package com.example.proyectofinal.Api
 
-import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.ApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -9,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
 
-    private const val BASE_URL = "http://10.0.2.2:8080/"// "http://10.0.2.16:8081/"
+    private const val BASE_URL = "http://10.0.2.2:8080/"
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -23,23 +22,15 @@ object ApiClient {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .client(
-                OkHttpClient.Builder()
-                    .addInterceptor(HttpLoggingInterceptor().apply {
-                        level = HttpLoggingInterceptor.Level.BODY
-                    }).build()
-            )
+            .client(client)
             .build()
     }
-    val apiService: AdministradorService by lazy {
+
+    val apiService: ApiService by lazy {
+        retrofit.create(ApiService::class.java)
+    }
+
+    val administradorService: AdministradorService by lazy {
         retrofit.create(AdministradorService::class.java)
-
     }
-    val apiServiceInsumo: InsumoService by lazy {
-        retrofit.create(InsumoService::class.java)
-    }
-    val productoInsumoService: ProductoInsumoService by lazy {
-        retrofit.create(ProductoInsumoService::class.java)
-    }
-
 }

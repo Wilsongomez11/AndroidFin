@@ -29,7 +29,7 @@ class MainViewModel : ViewModel() {
     private fun getAdministradores() {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.getAdministradores()
+                val response = ApiClient.administradorService.getAdministradores()
                 if (response.isSuccessful) {
                     _administradores.value = response.body() ?: emptyList()
                 } else {
@@ -44,7 +44,7 @@ class MainViewModel : ViewModel() {
     private fun getProductos() {
         viewModelScope.launch {
             try {
-                val response = ApiClient.apiService.getProductos()
+                val response = ApiClient.administradorService.getProductos()
                 if (response.isSuccessful) {
                     _productos.value = response.body() ?: emptyList()
                 } else {

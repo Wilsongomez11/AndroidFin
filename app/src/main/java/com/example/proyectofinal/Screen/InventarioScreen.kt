@@ -1,5 +1,4 @@
 package com.example.proyectofinal.Screen
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.ViewModel.AdministradorViewModel
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun InventarioScreen(
@@ -42,7 +42,7 @@ fun InventarioScreen(
             verticalArrangement = Arrangement.spacedBy(40.dp)
         ) {
             Text(
-                text = "Gestión de Existencias",
+                text = "\uD83D\uDCCB Gestión de Existencias",
                 color = Color.White,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
@@ -58,13 +58,11 @@ fun InventarioScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     InventarioMenuButton(
-                        label = "Ver Inventario",
-                        emoji = "👁️",
+                        label = "\uD83D\uDC41\uFE0F Ver Inventario",
                         onClick = { navController.navigate("verInventario") }
                     )
                     InventarioMenuButton(
-                        label = "Agregar Producto",
-                        emoji = "➕",
+                        label = "\u2795 Agregar Producto",
                         onClick = { navController.navigate("agregarProducto") }
                     )
                 }
@@ -74,13 +72,11 @@ fun InventarioScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     InventarioMenuButton(
-                        label = "Gestionar Insumos",
-                        emoji = "🧂",
+                        label = "\uD83E\uDDC2 Gestionar Insumos",
                         onClick = { navController.navigate("insumos?returnTo=inventario") }
                     )
                     InventarioMenuButton(
-                        label = "Ver Insumos",
-                        emoji = "📋",
+                        label = "\uD83D\uDCCB Ver Insumos",
                         onClick = { navController.navigate("verInsumos?returnTo=inventario") }
                     )
                 }
@@ -90,25 +86,23 @@ fun InventarioScreen(
 }
 
 @Composable
-fun InventarioMenuButton(label: String, emoji: String, onClick: () -> Unit) {
+fun InventarioMenuButton(label: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(110.dp) // tamaño más pequeño y proporcionado
+            .size(110.dp)
             .shadow(8.dp, RoundedCornerShape(18.dp))
-            .background(Color(0xFF1E1E1E), RoundedCornerShape(18.dp))
+            .background(Color(0xFF5E17EB), RoundedCornerShape(18.dp))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(emoji, fontSize = 30.sp)
-            Spacer(Modifier.height(6.dp))
-            Text(
-                label,
-                color = Color.White,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                lineHeight = 15.sp
-            )
-        }
+        Text(
+            label,
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            lineHeight = 15.sp,
+            modifier = Modifier.padding(horizontal = 8.dp),
+            textAlign = TextAlign.Center
+        )
     }
 }
