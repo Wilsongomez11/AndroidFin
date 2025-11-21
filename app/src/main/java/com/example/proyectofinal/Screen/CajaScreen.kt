@@ -1,5 +1,6 @@
 package com.example.proyectofinal.Screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -20,6 +22,7 @@ import com.example.proyectofinal.Model.MovimientoCaja
 import com.example.proyectofinal.Model.Pedido
 import com.example.proyectofinal.ViewModel.AdministradorViewModel
 import com.example.proyectofinal.ViewModel.CajaViewModel
+import com.example.proyectofinal.ViewModel.FacturaViewModel
 import com.example.proyectofinal.ViewModel.PedidoViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -52,23 +55,19 @@ fun CajaScreen(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        pedidoViewModel.obtenerPedidos(forceRefresh = true)
-        cajaViewModel.cargarMovimientos()
+        pedidoViewModel.obtenerPedidos(true)
+        cajaViewModel.recargarTodo()
     }
 
-    val pedidosPendientes = remember(pedidos) {
-        pedidos.filter {
-            val estado = it.estado?.lowercase() ?: ""
-            estado !in listOf("pagado", "devuelto", "parcialmente devuelto")
-        }
+    val pedidosPendientes = pedidos.filter {
+        val estado = it.estado?.lowercase() ?: ""
+        estado !in listOf("pagado", "devuelto", "parcialmente devuelto")
     }
 
-    val hoy = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
-    val movimientosDeHoy = remember(movimientos, hoy) {
-        movimientos
-            .filter { it.fecha?.startsWith(hoy) == true }
-            .sortedByDescending { it.id ?: 0 }
-    }
+    val hoy = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    val movimientosDeHoy = movimientos
+        .filter { it.fecha?.take(10) == hoy }
+        .sortedByDescending { it.id ?: 0 }
 
     Column(
         modifier = Modifier
@@ -85,8 +84,25 @@ fun CajaScreen(
             .padding(16.dp)
     ) {
         CajaEncabezado(balance = balance)
-
         Spacer(Modifier.height(24.dp))
+
+        Button(
+            onClick = { navController.navigate("facturas") },
+            colors = ButtonDefaults.buttonColors(Color(0xFF5E17EB)),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
+        ) {
+            Text(
+                text = "Ver Facturas",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
 
         Text(
             "Pedidos pendientes (${pedidosPendientes.size})",
@@ -96,7 +112,7 @@ fun CajaScreen(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(24.dp))
 
         LazyColumn(
             modifier = Modifier
@@ -107,7 +123,7 @@ fun CajaScreen(
             items(
                 items = pedidosPendientes,
                 key = { it.id ?: 0 }
-            ) { pedido ->
+            ) { pedido: Pedido ->
                 PedidoCard(
                     pedido = pedido,
                     onPagar = { id, total ->
@@ -127,7 +143,7 @@ fun CajaScreen(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            "Movimientos del d\u00EDa (${movimientosDeHoy.size})",
+            "Movimientos del día (${movimientosDeHoy.size})",
             color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
@@ -148,26 +164,34 @@ fun CajaScreen(
         PagoPopup(
             total = totalSel,
             onCerrar = { showPago = false },
-            onRegistrar = { monto ->
-                montoPagado = monto
+            onRegistrar = { montoRecibido ->
                 showPago = false
-
-                cajaViewModel.registrarPago(
-                    pedidoId = pedidoIdSel!!,
-                    monto = monto,
-                    adminId = adminId
-                )
-
-                pedidoViewModel.marcarPedidoComoPagado(pedidoIdSel!!)
+                montoPagado = montoRecibido
 
                 scope.launch {
-                    delay(500)
-                    cajaViewModel.cargarMovimientos()
-                    cajaViewModel.cargarCajaDelDia()
-                    pedidoViewModel.obtenerPedidos(forceRefresh = true)
-                }
+                    try {
+                        cajaViewModel.registrarPago(
+                            pedidoId = pedidoIdSel!!,
+                            monto = montoRecibido,
+                            adminId = adminId
+                        )
 
-                showRecibo = true
+                        delay(400)
+
+                        pedidoViewModel.actualizarEstadoPedido(pedidoIdSel!!, "Pagado")
+
+                        delay(600)
+
+                        pedidoViewModel.obtenerPedidos(true)
+                        pedidoViewModel.cargarEstadoMesas()
+                        cajaViewModel.recargarTodo()
+
+                        showRecibo = true
+
+                    } catch (e: Exception) {
+                        Log.e("CajaScreen", "Error en pago", e)
+                    }
+                }
             }
         )
     }
@@ -176,7 +200,7 @@ fun CajaScreen(
         DevolucionPopup(
             total = totalSel,
             onCerrar = { showDevolucion = false },
-            onConfirmar = { monto ->
+            onConfirmar = { montoDevolver ->
                 showDevolucion = false
 
                 scope.launch {
@@ -187,17 +211,19 @@ fun CajaScreen(
 
                         cajaViewModel.registrarDevolucion(
                             pedidoId = pedidoIdSel!!,
-                            monto = monto,
-                            adminId = adminId
+                            monto = (montoDevolver * -1.0),
+                            adminId = adminId,
+                            cantidades = emptyMap()
                         )
-                    } catch (e: Exception) {
-                        android.util.Log.e("CajaScreen", "Error devolucion", e)
-                    }
 
-                    delay(500)
-                    cajaViewModel.cargarMovimientos()
-                    cajaViewModel.cargarCajaDelDia()
-                    pedidoViewModel.obtenerPedidos(forceRefresh = true)
+                        delay(500)
+
+                        cajaViewModel.recargarTodo()
+                        pedidoViewModel.obtenerPedidos(true)
+
+                    } catch (e: Exception) {
+                        Log.e("CajaScreen", "Error devolucion", e)
+                    }
                 }
             }
         )
@@ -210,14 +236,29 @@ fun CajaScreen(
             pagado = montoPagado,
             cambio = resultadoPago!!["cambio"]?.toString() ?: "0",
             onCerrar = {
+                val id = pedidoIdSel ?: return@ReciboPopup
                 showRecibo = false
+                cajaViewModel.limpiarResultadoPago()
+
+                val facturaVM = FacturaViewModel()
+                facturaVM.obtenerFacturaPorPedido(id) { facturaExistente, err ->
+
+                    if (facturaExistente != null) {
+                        navController.navigate("verFactura/${facturaExistente.id}")
+                    } else {
+                        navController.navigate("facturar/$id")
+                    }
+                }
+
                 pedidoIdSel = null
                 totalSel = 0.0
                 montoPagado = 0.0
             }
+
         )
     }
 }
+
 
 @Composable
 fun CajaEncabezado(balance: Double) {
@@ -238,7 +279,7 @@ fun CajaEncabezado(balance: Double) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Caja del D\u00EDa",
+                "Caja del Día",
                 color = Color.White,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
@@ -250,7 +291,7 @@ fun CajaEncabezado(balance: Double) {
                 fontSize = 14.sp
             )
             Text(
-                "$${String.format("%.2f", balance)}",
+                "$${String.format(Locale.getDefault(), "%.2f", balance)}",
                 color = colorBalance,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold
@@ -285,7 +326,7 @@ fun PedidoCard(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "$${String.format("%.2f", pedido.total)}",
+                    "$${String.format(Locale.getDefault(), "%.2f", pedido.total)}",
                     color = Color(0xFF76FF03),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
@@ -334,6 +375,7 @@ fun PedidoCard(
                 ) {
                     Text("\u21A9 Devolver", color = Color.Black)
                 }
+
             }
         }
     }
@@ -375,7 +417,7 @@ fun MovimientosListaMejorada(movs: List<MovimientoCaja>) {
 fun MovimientoCard(mov: MovimientoCaja) {
     val esIngreso = mov.monto >= 0
     val colorMonto = if (esIngreso) Color(0xFF00FF9D) else Color(0xFFFF4B4B)
-    val icono = if (esIngreso) "\u2191" else "\u2193"
+    val icono = if (esIngreso) "↑" else "↓"
     val tipo = mov.descripcion?.split(" - ")?.getOrNull(0) ?: "Movimiento"
 
     val hora = try {
@@ -439,10 +481,11 @@ fun MovimientoCard(mov: MovimientoCaja) {
             }
 
             Text(
-                "${if (esIngreso) "+" else ""}$${String.format("%.2f", mov.monto)}",
+                "${if (esIngreso) "+" else ""}$${String.format(Locale.getDefault(), "%.2f", mov.monto)}",
                 color = colorMonto,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End
             )
         }
     }
@@ -457,10 +500,10 @@ fun PagoPopup(
     var monto by remember { mutableStateOf("") }
 
     BasePopup(
-        titulo = "Registrar Pago",
+        titulo = "Registrar pago",
         contenido = {
             Text(
-                "Monto total: $${String.format("%.2f", total)}",
+                "Monto total: $${String.format(Locale.getDefault(), "%.2f", total)}",
                 color = Color(0xFFB388FF),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -476,7 +519,7 @@ fun PagoPopup(
             if (montoRecibido >= total) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Cambio: $${String.format("%.2f", montoRecibido - total)}",
+                    "Cambio: $${String.format(Locale.getDefault(), "%.2f", montoRecibido - total)}",
                     color = Color(0xFF00FF9D),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -484,8 +527,10 @@ fun PagoPopup(
             }
         },
         confirmar = {
-            val v = monto.toDoubleOrNull()
-            if (v != null && v >= total) onRegistrar(v)
+            val valor = monto.toDoubleOrNull()
+            if (valor != null && valor >= total) {
+                onRegistrar(valor)
+            }
         },
         cancelar = onCerrar
     )
@@ -498,18 +543,22 @@ fun DevolucionPopup(
     onConfirmar: (Double) -> Unit
 ) {
     BasePopup(
-        titulo = "\u26A0 Devolver pedido",
+        titulo = "Devolver pedido",
         contenido = {
-            Text("\u00BFDeseas devolver el pedido completo?", color = Color.White, fontSize = 16.sp)
+            Text(
+                "¿Deseas devolver el pedido completo?",
+                color = Color.White,
+                fontSize = 16.sp
+            )
             Spacer(Modifier.height(8.dp))
             Text(
-                "Monto a devolver: $${String.format("%.2f", total)}",
+                "Monto a devolver: $${String.format(Locale.getDefault(), "%.2f", total)}",
                 color = Color(0xFFFF4B4B),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
         },
-        confirmarTexto = "S\u00ED, devolver",
+        confirmarTexto = "Sí, devolver",
         confirmar = { onConfirmar(total) },
         cancelar = onCerrar
     )
@@ -524,7 +573,7 @@ fun ReciboPopup(
     onCerrar: () -> Unit
 ) {
     BasePopup(
-        titulo = "\u2705 Pago registrado",
+        titulo = "Pago registrado",
         contenido = {
             Card(
                 colors = CardDefaults.cardColors(Color(0xFF2A2844)),
@@ -532,10 +581,17 @@ fun ReciboPopup(
             ) {
                 Column(Modifier.padding(16.dp)) {
                     ReciboPropiedades("Pedido #", pedidoId.toString())
-                    ReciboPropiedades("Total", "$${String.format("%.2f", total)}")
-                    ReciboPropiedades("Pagado", "$${String.format("%.2f", pagado)}")
-                    Divider(color = Color.Gray.copy(alpha = 0.3f), modifier = Modifier.padding(vertical = 8.dp))
-                    ReciboPropiedades("Cambio", "$${String.format("%.2f", cambio.toDoubleOrNull() ?: 0.0)}", Color(0xFF00FF9D))
+                    ReciboPropiedades("Total", "$${String.format(Locale.getDefault(), "%.2f", total)}")
+                    ReciboPropiedades("Pagado", "$${String.format(Locale.getDefault(), "%.2f", pagado)}")
+                    Divider(
+                        color = Color.Gray.copy(alpha = 0.3f),
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                    ReciboPropiedades(
+                        "Cambio",
+                        "$${String.format(Locale.getDefault(), "%.2f", cambio.toDoubleOrNull() ?: 0.0)}",
+                        Color(0xFF00FF9D)
+                    )
                 }
             }
         },

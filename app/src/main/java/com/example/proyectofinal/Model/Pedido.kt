@@ -5,7 +5,7 @@ data class Pedido(
     val fecha: String? = null,
     val estado: String,
     val total: Double,
-    val mesa: Mesa?,               // ← CORREGIDO
+    val mesa: Mesa?,
     val cliente: Cliente?,
     val mesero: Mesero? = null,
     val detalles: List<DetallePedido>

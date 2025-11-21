@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,12 +34,16 @@ fun VerRecetaScreen(
 ) {
     val relaciones by viewModel.relaciones.collectAsState()
     val listaInsumos by insumoViewModel.insumos.collectAsState()
+
     var expanded by remember { mutableStateOf(false) }
     var insumoSeleccionado by remember { mutableStateOf<Insumo?>(null) }
     var cantidadUsada by remember { mutableStateOf("") }
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var relacionAEliminar by remember { mutableStateOf<ProductoInsumo?>(null) }
+
     LaunchedEffect(producto.id) {
-        viewModel.obtenerRelacionesPorProducto(producto.id)
+        viewModel.obtenerRelacionesPorProducto(producto.id!!)
         insumoViewModel.obtenerInsumos()
     }
 
@@ -52,12 +58,14 @@ fun VerRecetaScreen(
                 )
                 .padding(padding)
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 Text(
                     text = "\uD83D\uDCC3 Receta de ${producto.nombre}",
                     color = Color.White,
@@ -66,12 +74,13 @@ fun VerRecetaScreen(
                 )
 
                 Text(
-                    text = "ID del producto: ${producto.id}",
+                    text = "ID: ${producto.id}",
                     color = Color.LightGray,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
+                // ------------------ SELECCIÓN DE INSUMOS ------------------
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded },
@@ -176,12 +185,32 @@ fun VerRecetaScreen(
                                     .shadow(4.dp, RoundedCornerShape(20.dp)),
                                 colors = CardDefaults.cardColors(containerColor = Color(0xFF3A0CA3))
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("ID Insumo: ${rel.insumo?.id}", color = Color.White)
-                                    Text("Cantidad usada: ${rel.cantidadUsada}", color = Color.LightGray)
+
+                                    Column {
+                                        Text("ID Insumo: ${rel.insumo?.id}", color = Color.White)
+                                        Text("Nombre: ${rel.insumo?.nombre}", color = Color.White)
+                                        Text("Cantidad usada: ${rel.cantidadUsada}", color = Color.LightGray)
+                                    }
+
+                                    IconButton(
+                                        onClick = {
+                                            relacionAEliminar = rel
+                                            showDeleteDialog = true
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Delete,
+                                            contentDescription = "Eliminar",
+                                            tint = Color(0xFFFF4B4B)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -190,4 +219,44 @@ fun VerRecetaScreen(
             }
         }
     }
+
+    // ------------------------ POPUP DE CONFIRMACIÓN ------------------------
+    if (showDeleteDialog && relacionAEliminar != null) {
+
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = {
+                Text("Eliminar insumo", color = Color.White)
+            },
+            text = {
+                Text(
+                    "¿Seguro que deseas eliminar este insumo de la receta?",
+                    color = Color.LightGray
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.eliminarRelacion(
+                            relacionId = relacionAEliminar!!.id!!,
+                            productoId = producto.id!!
+                        )
+                        showDeleteDialog = false
+                        relacionAEliminar = null
+                    },
+                    colors = ButtonDefaults.buttonColors(Color(0xFFEF5350))
+                ) {
+                    Text("Eliminar", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar", color = Color.LightGray)
+                }
+            },
+            containerColor = Color(0xFF1C1B29),
+            shape = RoundedCornerShape(22.dp)
+        )
+    }
 }
+

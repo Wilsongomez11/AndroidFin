@@ -3,6 +3,7 @@ package com.example.proyectofinal.Api
 import com.example.proyectofinal.LoginRequest
 import com.example.proyectofinal.LoginResponse
 import com.example.proyectofinal.Model.*
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -157,6 +158,9 @@ interface AdministradorService {
         @Body productoInsumo: ProductoInsumo
     ): Response<ProductoInsumo>
 
+    @DELETE("producto-insumos/{id}")
+    suspend fun eliminarProductoInsumo(@Path("id") id: Long): Response<Void>
+
     // ---  PROVEEDORES ---
     @GET("proveedores")
     suspend fun getProveedores(): Response<List<Proveedor>>
@@ -183,7 +187,17 @@ interface AdministradorService {
     @GET("insumos/bajo-stock")
     suspend fun getInsumosBajoStock(): Response<List<Insumo>>
 
-    // ---PAGOS---
+    // ---FACTURAS---
+    @GET("facturas/pedido/{pedidoId}")
+    suspend fun obtenerPorPedido(
+        @Path("pedidoId") pedidoId: Long
+    ): Response<Factura>
+
+    @GET("facturas/{id}/pdf")
+    suspend fun descargarPdf(
+        @Path("id") id: Long
+    ): Response<ResponseBody>
+
     // --- PAGOS ---
     @POST("pagos/registrar")
     suspend fun registrarPago(

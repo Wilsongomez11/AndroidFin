@@ -53,6 +53,12 @@ android {
     }
 }
 
+kotlin {
+    sourceSets.all {
+        languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3Api")
+    }
+}
+
 dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     implementation("androidx.compose.animation:animation:1.5.4")

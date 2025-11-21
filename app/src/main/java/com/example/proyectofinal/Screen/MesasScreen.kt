@@ -1,5 +1,6 @@
 package com.example.proyectofinal.Screen
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.navigation.NavHostController
 import com.example.proyectofinal.ViewModel.PedidoViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun MesasScreen(
@@ -30,27 +32,38 @@ fun MesasScreen(
     pedidoViewModel: PedidoViewModel = viewModel()
 ) {
     val estadoMesas by pedidoViewModel.estadoMesas.collectAsState()
+    val pedidos by pedidoViewModel.pedidos.collectAsState()
     val mesas = remember { (1..12).toList() }
-    var isLoading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
 
+    // ✅ Cargar datos al entrar
     LaunchedEffect(Unit) {
+        Log.d("MesasScreen", "🔄 Iniciando carga...")
         isLoading = true
-        pedidoViewModel.cargarEstadoMesas()
+
+        pedidoViewModel.obtenerPedidos(forceRefresh = true)
         delay(200)
+        pedidoViewModel.cargarEstadoMesas()
+        delay(500)
+
         isLoading = false
+        Log.d("MesasScreen", "✅ Carga completada")
     }
 
-    val refreshTrigger = navController.currentBackStackEntry
-        ?.savedStateHandle
-        ?.getStateFlow("refreshMesas", false)
-        ?.collectAsState()
+    // ✅ Recargar cuando vuelves de otra pantalla
+    val currentEntry = navController.currentBackStackEntry
+    LaunchedEffect(currentEntry) {
+        Log.d("MesasScreen", "🔄 Recargando por navegación...")
+        pedidoViewModel.cargarEstadoMesas()
+    }
 
-    LaunchedEffect(refreshTrigger?.value) {
-        if (refreshTrigger?.value == true) {
-            pedidoViewModel.cargarEstadoMesas()
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set("refreshMesas", false)
+    // ✅ Log para debugging
+    LaunchedEffect(estadoMesas, pedidos) {
+        Log.d("MesasScreen", "📊 Estado mesas: $estadoMesas")
+        Log.d("MesasScreen", "📦 Pedidos: ${pedidos.size}")
+        pedidos.forEach {
+            Log.d("MesasScreen", "  - Pedido ${it.id}: Mesa ${it.mesa?.numero}, Estado: ${it.estado}")
         }
     }
 
@@ -69,6 +82,7 @@ fun MesasScreen(
             .padding(16.dp)
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,7 +91,7 @@ fun MesasScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Mesas",
+                    text = "🪑 Mesas",
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
@@ -97,14 +111,23 @@ fun MesasScreen(
 
                     IconButton(
                         onClick = {
-                            pedidoViewModel.cargarEstadoMesas()
+                            scope.launch {
+                                Log.d("MesasScreen", "🔄 Recargando manualmente...")
+                                isLoading = true
+                                pedidoViewModel.obtenerPedidos(forceRefresh = true)
+                                delay(200)
+                                pedidoViewModel.cargarEstadoMesas()
+                                delay(500)
+                                isLoading = false
+                            }
                         }
                     ) {
-                        Text("\uD83D\uDD04", fontSize = 20.sp)
+                        Text("🔄", fontSize = 20.sp)
                     }
                 }
             }
 
+            // Leyenda
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -132,7 +155,25 @@ fun MesasScreen(
                 }
             }
 
-            if (estadoMesas.isEmpty() && isLoading) {
+            // Debug info
+            if (estadoMesas.isEmpty()) {
+                Text(
+                    "⚠️ No se cargaron las mesas",
+                    color = Color.Yellow,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(8.dp)
+                )
+            } else {
+                Text(
+                    "✅ ${estadoMesas.size} mesas cargadas",
+                    color = Color.Green,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+
+            // Grid de mesas
+            if (isLoading && estadoMesas.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -160,16 +201,18 @@ fun MesasScreen(
                     items(
                         items = mesas,
                         key = { it }
-                    ) { mesa ->
-                        val ocupada = estadoMesas[mesa] == "Ocupada"
+                    ) { numeroMesa ->
+                        val estadoMesa = estadoMesas[numeroMesa] ?: "Libre"
+                        val ocupada = estadoMesa == "Ocupada"
+
+                        Log.d("MesasScreen", "Mesa $numeroMesa -> Estado: $estadoMesa")
 
                         MesaButton(
-                            mesaNumero = mesa,
+                            mesaNumero = numeroMesa,
                             ocupada = ocupada,
                             onClick = {
-                                if (!ocupada) {
-                                    navController.navigate("crearPedido/$mesa")
-                                }
+                                Log.d("MesasScreen", "👆 Click en mesa $numeroMesa")
+                                navController.navigate("crearPedido/$numeroMesa")
                             }
                         )
                     }
@@ -193,7 +236,7 @@ fun MesaButton(
             modifier = Modifier
                 .size(100.dp)
                 .shadow(10.dp, shape = CircleShape)
-                .clickable(enabled = !ocupada) { onClick() },
+                .clickable { onClick() },
             shape = CircleShape,
             color = backgroundColor,
             border = BorderStroke(2.dp, borderColor)
@@ -217,7 +260,8 @@ fun MesaButton(
             text = if (ocupada) "Ocupada" else "Libre",
             color = Color.White,
             fontSize = 14.sp,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            fontWeight = if (ocupada) FontWeight.Bold else FontWeight.Normal
         )
     }
 }

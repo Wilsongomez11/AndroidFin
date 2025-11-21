@@ -215,4 +215,21 @@ class ProductoViewModel : ViewModel() {
             }
         }
     }
+
+    fun eliminarRelacion(relacionId: Long, productoId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = ApiClient.administradorService.eliminarProductoInsumo(relacionId)
+
+                if (response.isSuccessful) {
+                    obtenerRelacionesPorProducto(productoId)
+                } else {
+                    println("Error eliminando relación: ${response.code()}")
+                }
+
+            } catch (e: Exception) {
+                println("Error eliminando relación: ${e.localizedMessage}")
+            }
+        }
+    }
 }

@@ -6,14 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Pedido
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import retrofit2.HttpException
-import java.io.IOException
 
 class PedidoViewModel : ViewModel() {
 
@@ -32,9 +31,6 @@ class PedidoViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
     private var lastFetchTime = 0L
     private val CACHE_DURATION = 3000L
     private var isFetching = false
@@ -50,23 +46,22 @@ class PedidoViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                _errorDetallado.value = null
 
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.apiService.crearPedido(pedido)
                 }
 
                 if (response.isSuccessful) {
-                    val msg = "\u2705 Pedido registrado correctamente"
+                    val msg = "Pedido creado"
                     _mensaje.value = msg
                     onResult(msg)
-                    cargarEstadoMesas()
+
                     obtenerPedidos(true)
+                    cargarEstadoMesas()
                 } else {
-                    val mensajeLimpio = extraerMensajeError(response.errorBody()?.string())
-                    _mensaje.value = mensajeLimpio
-                    _errorDetallado.value = mensajeLimpio
-                    onResult(mensajeLimpio)
+                    val msg = extraerMensajeError(response.errorBody()?.string())
+                    _errorDetallado.value = msg
+                    onResult(msg)
                 }
             } finally {
                 _isLoading.value = false
@@ -74,13 +69,19 @@ class PedidoViewModel : ViewModel() {
         }
     }
 
+    fun actualizarPedido(pedido: Pedido, onResult: (String) -> Unit) {
+        val id = pedido.id ?: return
+        val estado = pedido.estado ?: return
+
+        actualizarEstadoPedido(id, estado)
+        onResult("Pedido actualizado")
+    }
+
     fun obtenerPedidos(forceRefresh: Boolean = false) {
         val now = System.currentTimeMillis()
 
-        if (!forceRefresh &&
-            _pedidos.value.isNotEmpty() &&
-            (now - lastFetchTime) < CACHE_DURATION
-        ) return
+        if (!forceRefresh && _pedidos.value.isNotEmpty() &&
+            (now - lastFetchTime) < CACHE_DURATION) return
 
         if (isFetching) return
 
@@ -96,64 +97,36 @@ class PedidoViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _pedidos.value = response.body() ?: emptyList()
                     lastFetchTime = now
-                    _mensaje.value = ""
-                } else {
-                    _mensaje.value = "Error ${response.code()}"
                 }
-            } catch (e: IOException) {
-                _mensaje.value = "\u26A0 Error de conexi\u00F3n"
-            } catch (e: HttpException) {
-                _mensaje.value = "\u26A0 Error HTTP"
-            } catch (e: Exception) {
-                _mensaje.value = "\u26A0 Error desconocido"
             } finally {
                 isFetching = false
                 _isLoading.value = false
-                _isRefreshing.value = false
             }
         }
     }
 
-    fun refrescar() {
-        _isRefreshing.value = true
-        obtenerPedidos(true)
-    }
-
-    fun actualizarPedido(pedido: Pedido, onResult: (String) -> Unit) {
+    fun actualizarEstadoPedido(id: Long, nuevoEstado: String) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-                _errorDetallado.value = null
-
-                val id = pedido.id ?: return@launch
-
-                _pedidos.value = _pedidos.value.map { if (it.id == id) pedido else it }
+                Log.d("PedidoVM", "Actualizando estado backend...")
 
                 val response = withContext(Dispatchers.IO) {
-                    ApiClient.apiService.actualizarPedido(id, pedido)
+                    ApiClient.apiService.actualizarEstadoPedido(id, nuevoEstado)
                 }
 
                 if (response.isSuccessful) {
-                    val msg = "\u2705 Pedido actualizado correctamente"
-                    _mensaje.value = msg
-                    onResult(msg)
+                    _mensaje.value = "Estado actualizado"
+
+                    delay(350)
+                    obtenerPedidos(true)
                     cargarEstadoMesas()
-                    obtenerPedidos(true)
                 } else {
-                    val mensajeLimpio = extraerMensajeError(response.errorBody()?.string())
-                    _mensaje.value = mensajeLimpio
-                    _errorDetallado.value = mensajeLimpio
-                    onResult(mensajeLimpio)
-                    obtenerPedidos(true)
+                    val msg = extraerMensajeError(response.errorBody()?.string())
+                    _errorDetallado.value = msg
                 }
+
             } catch (e: Exception) {
-                val msg = "\u26A0 ${e.localizedMessage ?: "Error desconocido"}"
-                _mensaje.value = msg
-                _errorDetallado.value = msg
-                onResult(msg)
-                obtenerPedidos(true)
-            } finally {
-                _isLoading.value = false
+                _errorDetallado.value = e.localizedMessage
             }
         }
     }
@@ -162,60 +135,20 @@ class PedidoViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-                _errorDetallado.value = null
-
-                val respaldo = _pedidos.value.find { it.id == id }
-                _pedidos.value = _pedidos.value.filterNot { it.id == id }
 
                 val response = withContext(Dispatchers.IO) {
                     ApiClient.apiService.eliminarPedido(id)
                 }
 
                 if (response.isSuccessful) {
-                    _mensaje.value = "\u2705 Pedido eliminado correctamente"
+                    obtenerPedidos(true)
                     cargarEstadoMesas()
                 } else {
-                    if (respaldo != null) _pedidos.value = _pedidos.value + respaldo
-                    val mensajeLimpio = extraerMensajeError(response.errorBody()?.string())
-                    _mensaje.value = mensajeLimpio
-                    _errorDetallado.value = mensajeLimpio
+                    _errorDetallado.value = extraerMensajeError(response.errorBody()?.string())
                 }
+
             } finally {
                 _isLoading.value = false
-            }
-        }
-    }
-
-    fun marcarPedidoComoPagado(id: Long) {
-        actualizarEstadoPedido(id, "Pagado")
-    }
-
-    fun marcarPedidoComoDevuelto(id: Long) {
-        actualizarEstadoPedido(id, "Devuelto")
-    }
-
-    fun actualizarEstadoPedido(id: Long, nuevoEstado: String) {
-        viewModelScope.launch {
-            try {
-                _pedidos.value = _pedidos.value.map {
-                    if (it.id == id) it.copy(estado = nuevoEstado) else it
-                }
-
-                val response = withContext(Dispatchers.IO) {
-                    ApiClient.apiService.actualizarEstadoPedido(id, nuevoEstado)
-                }
-
-                if (response.isSuccessful) {
-                    _mensaje.value = "\u2705 Estado actualizado correctamente"
-                    cargarEstadoMesas()
-                    obtenerPedidos(true)
-                } else {
-                    obtenerPedidos(true)
-                    _mensaje.value = "\u274C Error al actualizar estado (${response.code()})"
-                }
-            } catch (e: Exception) {
-                obtenerPedidos(true)
-                _mensaje.value = "\u26A0 Error: ${e.localizedMessage}"
             }
         }
     }
@@ -223,51 +156,39 @@ class PedidoViewModel : ViewModel() {
     fun cargarEstadoMesas() {
         viewModelScope.launch {
             try {
-                val response = withContext(Dispatchers.IO) {
-                    ApiClient.apiService.getPedidos()
-                }
-
+                val response = ApiClient.apiService.getEstadoMesas()
                 if (response.isSuccessful) {
-                    val info = response.body() ?: emptyList()
-                    val mesas = mutableMapOf<Int, String>()
-
-                    info.forEach { pedido ->
-                        val mesa = pedido.mesa?.id?.toInt()
-                        if (mesa != null) {
-                            val ocupado = pedido.estado != "Devuelto" && pedido.estado != "Pagado"
-                            mesas[mesa] = if (ocupado) "Ocupada" else "Libre"
-                        }
-                    }
-
-                    _estadoMesas.value = mesas
+                    _estadoMesas.value = response.body() ?: emptyMap()
                 }
-
             } catch (e: Exception) {
-                Log.e("PedidoVM", "Error mesas", e)
+                Log.e("PedidoVM", "Error cargando mesas", e)
             }
         }
     }
 
-
     private fun extraerMensajeError(errorBody: String?): String {
         return try {
-            if (errorBody.isNullOrBlank()) return "\u26A0 Error desconocido"
-
+            if (errorBody.isNullOrBlank()) return "Error desconocido"
             val json = JSONObject(errorBody)
-            val msg = json.optString("message")
-            if (msg.isNotBlank()) return "\u274C $msg"
-
-            val err = json.optString("error")
-            if (err.isNotBlank()) return "\u274C $err"
-
-            "\u26A0 Error del servidor"
+            json.optString("message").ifBlank {
+                json.optString("error", "Error del servidor")
+            }
         } catch (e: Exception) {
-            "\u26A0 Error procesando respuesta"
+            "Error procesando respuesta"
         }
     }
-
     fun limpiarError() {
         _mensaje.value = ""
         _errorDetallado.value = null
     }
+    fun refrescar() {
+        obtenerPedidos(true)
+    }
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
+    fun setRefreshing(value: Boolean) {
+        _isRefreshing.value = value
+    }
+
 }

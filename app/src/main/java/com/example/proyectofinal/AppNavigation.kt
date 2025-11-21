@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -14,6 +15,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+
 import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.Screen.*
 import com.example.proyectofinal.ViewModel.*
@@ -217,5 +219,56 @@ fun AppNavigation(
             val id = entry.arguments?.getString("id")
             AgregarProveedor(navController, proveedorId = id)
         }
+
+
+        composable(
+            route = "facturar/{pedidoId}",
+            arguments = listOf(navArgument("pedidoId") { type = NavType.LongType })
+        ) { entry ->
+            val pedidoId = entry.arguments?.getLong("pedidoId") ?: 0L
+            val facturaViewModel: FacturaViewModel = viewModel()
+            val pedidos by pedidoViewModelCompartido.pedidos.collectAsState()
+            val pedido = remember(pedidos) { pedidos.find { it.id == pedidoId } }
+
+            when (pedido) {
+                null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+                else -> {
+                    FacturarPedidoScreen(
+                        navController = navController,
+                        pedido = pedido,
+                        facturaViewModel = facturaViewModel
+                    )
+                }
+            }
+        }
+        composable("facturas") {
+            val facturaViewModel: FacturaViewModel = viewModel()
+
+            ListarFacturasScreen(
+                navController = navController,
+                facturaViewModel = facturaViewModel
+            )
+        }
+
+        composable("verFactura/{id}") { entry ->
+            val facturaId = entry.arguments?.getString("id")!!.toLong()
+            val context = LocalContext.current
+            val viewModel: FacturaViewModel = viewModel()
+
+            VerFacturaScreen(
+                facturaId = facturaId,
+                viewModel = viewModel,
+                context = context,
+                navController = navController
+            )
+        }
+
     }
 }

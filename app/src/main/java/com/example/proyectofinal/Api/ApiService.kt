@@ -1,6 +1,8 @@
 package com.example.proyectofinal
 
+
 import com.example.proyectofinal.Model.*
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 import retrofit2.http.Path
@@ -86,7 +88,6 @@ interface ApiService {
     @GET("pedidos/mesas/estado")
     suspend fun getEstadoMesas(): Response<Map<Int, String>>
 
-
     @GET("pedidos/mesas/ocupadas")
     suspend fun getMesasOcupadas(): Response<List<Int>>
 
@@ -168,4 +169,36 @@ interface ApiService {
 
     @DELETE("pizzeros/{id}")
     suspend fun eliminarPizzero(@Path("id") id: Long): Response<Void>
+
+    // ---FACTURAS---
+    @GET("facturas/pedido/{pedidoId}")
+    suspend fun obtenerFacturaPorPedido(
+        @Path("pedidoId") pedidoId: Long
+    ): Response<Factura>
+
+    @GET("facturas/{id}/pdf")
+    suspend fun descargarFacturaPdf(
+        @Path("id") id: Long
+    ): Response<ResponseBody>
+
+    @POST("/facturas/generar")
+    suspend fun generarFactura(
+        @Body request: GenerarFacturaRequest
+    ): Response<Factura>
+
+    @GET("/facturas/{id}")
+    suspend fun obtenerFactura(
+        @Path("id") id: Long
+    ): Response<Factura>
+
+    @GET("/facturas")
+    suspend fun listarFacturas(
+    ): Response<List<Factura>>
+
+    @GET("/facturas/{id}/pdf")
+    @Streaming
+    suspend fun descargarPdf(
+        @Path("id") id: Long
+    ): Response<ResponseBody>
+
 }

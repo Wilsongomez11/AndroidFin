@@ -189,24 +189,43 @@ fun DashboardContent(
     }
 
     Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp).fillMaxWidth()
+        verticalArrangement = Arrangement.Top
     ) {
-        Text("\uD83D\uDCCB Bienvenido al panel principal", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Text("\uD83D\uDCCB Bienvenido al panel principal",
+            color = Color.White,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Card(
-            modifier = Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(20.dp)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(6.dp, RoundedCornerShape(20.dp)),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
             shape = RoundedCornerShape(20.dp)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text("\uD83D\uDC4B Bienvenido, $adminActual", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text("Rol: $adminRol", color = Color.LightGray, fontSize = 14.sp)
+                Text("\uD83D\uDC4B Bienvenido, $adminActual",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text("Rol: $adminRol",
+                    color = Color.LightGray,
+                    fontSize = 14.sp
+                )
             }
         }
 
@@ -216,12 +235,19 @@ fun DashboardContent(
             onClick = { navController.navigate("caja") },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
             shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.fillMaxWidth(0.9f).height(60.dp)
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .height(60.dp)
         ) {
-            Text("\uD83D\uDCB3 Ir a Caja", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text("\uD83D\uDCB3 Ir a Caja",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+
 
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
             IndicadorCard("\uD83D\uDCCB Pedidos", pedidos.size.toString())

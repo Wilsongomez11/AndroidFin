@@ -1,7 +1,6 @@
 package com.example.proyectofinal.ViewModel
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.proyectofinal.Api.ApiClient
@@ -46,15 +45,8 @@ class CajaViewModel : ViewModel() {
                 val response = ApiClient.apiService.getMovimientos()
 
                 if (response.isSuccessful) {
-                    val movs = response.body() ?: emptyList()
-
-                    if (movs.isEmpty()) {
-                        _error.value = "La API devolvió lista vacía"
-                    }
-
-                    _movimientos.value = movs
-
-                    delay(100)
+                    _movimientos.value = response.body() ?: emptyList()
+                    delay(50)
                     calcularBalanceLocal()
                 } else {
                     _error.value = "Error: ${response.code()}"
@@ -67,6 +59,7 @@ class CajaViewModel : ViewModel() {
             }
         }
     }
+
 
     fun registrarPago(pedidoId: Long, monto: Double, adminId: Long) {
         viewModelScope.launch {
@@ -92,7 +85,12 @@ class CajaViewModel : ViewModel() {
         }
     }
 
-    fun registrarDevolucion(pedidoId: Long, monto: Double, adminId: Long) {
+    fun registrarDevolucion(
+        pedidoId: Long,
+        monto: Double,
+        adminId: Long,
+        cantidades: Map<Long, Int>
+    ) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
@@ -100,7 +98,7 @@ class CajaViewModel : ViewModel() {
                 val request = DevolucionRequest(
                     monto = monto,
                     reponerStock = true,
-                    cantidades = emptyMap()
+                    cantidades = cantidades
                 )
 
                 val response = ApiClient.apiService.devolverPedido(
@@ -127,61 +125,28 @@ class CajaViewModel : ViewModel() {
     fun calcularBalanceLocal() {
         try {
             val hoy = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-
-            val todosLosMov = _movimientos.value
-
-            val movimientosHoy = todosLosMov.filter {
-                val fecha = it.fecha ?: hoy
-                fecha.startsWith(hoy)
+            val movimientosHoy = _movimientos.value.filter {
+                it.fecha?.take(10) == hoy
             }
 
-            if (movimientosHoy.isEmpty()) {
-                _balance.value = 0.0
-                return
-            }
-
-            var total = 0.0
-            movimientosHoy.forEach { mov ->
-                val tipo = mov.tipo?.lowercase() ?: ""
-                val monto = mov.monto
-
-                val valor = when (tipo) {
-                    "ingreso", "pago" -> {
-                        monto
-                    }
-                    "devolucion", "egreso" -> {
-                        -monto
-                    }
-                    else -> {
-                        0.0
-                    }
-                }
-                total += valor
-            }
-
-            _balance.value = total
+            _balance.value = movimientosHoy.sumOf { it.monto }
 
         } catch (e: Exception) {
-            _error.value = "Error calculando balance: ${e.localizedMessage}"
+            _error.value = "Error calculando balance"
         }
     }
 
     fun cargarCajaDelDia() {
         viewModelScope.launch {
             try {
-
                 val response = ApiClient.apiService.getCajaDelDia()
-
                 if (response.isSuccessful) {
-                    val cajaResponse = response.body()!!
-
-                    _caja.value = cajaResponse
-                    _balance.value = cajaResponse.balance
-
+                    val cajaResp = response.body()
+                    _caja.value = cajaResp
+                    _balance.value = cajaResp?.balance ?: 0.0
                 } else {
                     calcularBalanceLocal()
                 }
-
             } catch (e: Exception) {
                 calcularBalanceLocal()
             }

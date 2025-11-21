@@ -42,14 +42,12 @@ fun CrearPedidoScreen(
     val errorDetallado by pedidoViewModel.errorDetallado.collectAsState()
     val pedidos by pedidoViewModel.pedidos.collectAsState()
 
-    // Campo mesa como texto, pero la mesa real será un objeto Mesa
     var mesaTexto by remember { mutableStateOf(mesaId?.toString() ?: "") }
     val mesaEsFija = mesaId != null
 
     val carrito = remember { mutableStateListOf<DetallePedido>() }
     var clienteIdText by remember { mutableStateOf("") }
 
-    // Agregar SnackbarHost para mostrar errores
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -57,7 +55,6 @@ fun CrearPedidoScreen(
         pedidoViewModel.obtenerPedidos()
     }
 
-    // Mostrar errores detallados en Snackbar
     LaunchedEffect(errorDetallado) {
         errorDetallado?.let { error ->
             snackbarHostState.showSnackbar(
@@ -102,7 +99,7 @@ fun CrearPedidoScreen(
             Column(modifier = Modifier.padding(16.dp)) {
 
                 Text(
-                    text = "Nuevo Pedido",
+                    text = "🛒 Nuevo Pedido",
                     color = Color.White,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
@@ -164,7 +161,7 @@ fun CrearPedidoScreen(
                 // Carrito
                 if (carrito.isNotEmpty()) {
                     Text(
-                        text = "Productos agregados:",
+                        text = "📦 Productos agregados:",
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -184,7 +181,7 @@ fun CrearPedidoScreen(
 
                 // Total
                 Text(
-                    text = "Total: $${String.format("%.2f", total.value)}",
+                    text = "💰 Total: $${String.format("%.2f", total.value)}",
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -197,30 +194,33 @@ fun CrearPedidoScreen(
                 Button(
                     onClick = {
                         if (carrito.isEmpty()) {
-
                             return@Button
                         }
 
-                        val clienteObj =
-                            clienteIdText.toLongOrNull()?.let { Cliente(id = it) }
+                        val clienteObj = clienteIdText.toLongOrNull()?.let { Cliente(id = it) }
 
-
+                        //  CREAR OBJETO MESA CORRECTAMENTE
                         val mesaNumero = mesaId ?: mesaTexto.toIntOrNull()
-                        val mesaObj = mesaNumero?.let { Mesa(id = it.toLong()) }
+                        val mesaObj = if (mesaNumero != null) {
+                            Mesa(id = mesaNumero.toLong(), numero = mesaNumero, estado = "Ocupada")
+                        } else {
+                            null
+                        }
 
-
+                        // Verificar si existe pedido pendiente en esa mesa
                         val pedidoExistente = pedidos.find { pedido ->
-                            val idMesaPedido = pedido.mesa?.id?.toInt()
-                            idMesaPedido == mesaNumero && pedido.estado != "Pagado"
+                            pedido.mesa?.numero == mesaNumero &&
+                                    pedido.estado !in listOf("Pagado", "Devuelto")
                         }
 
                         if (pedidoExistente != null) {
-
+                            // AGREGAR PRODUCTOS AL PEDIDO EXISTENTE
                             val detallesActualizados = pedidoExistente.detalles.toMutableList()
 
                             carrito.forEach { nuevo ->
-                                val viejo =
-                                    detallesActualizados.find { it.producto.id == nuevo.producto.id }
+                                val viejo = detallesActualizados.find {
+                                    it.producto.id == nuevo.producto.id
+                                }
 
                                 if (viejo != null) {
                                     val index = detallesActualizados.indexOf(viejo)
@@ -231,8 +231,9 @@ fun CrearPedidoScreen(
                                 }
                             }
 
-                            val nuevoTotal =
-                                detallesActualizados.sumOf { it.cantidad * it.precioUnitario }
+                            val nuevoTotal = detallesActualizados.sumOf {
+                                it.cantidad * it.precioUnitario
+                            }
 
                             val pedidoActualizado = pedidoExistente.copy(
                                 mesa = pedidoExistente.mesa ?: mesaObj,
@@ -242,15 +243,14 @@ fun CrearPedidoScreen(
                             )
 
                             pedidoViewModel.actualizarPedido(pedidoActualizado) { resultado ->
-                                if (resultado.contains("\u2705")) {
+                                if (resultado.contains("✅")) {
                                     carrito.clear()
                                     navController.popBackStack()
                                 }
-
                             }
 
                         } else {
-
+                            // CREAR PEDIDO NUEVO
                             val pedidoNuevo = Pedido(
                                 estado = "Pendiente",
                                 total = total.value,
@@ -261,16 +261,15 @@ fun CrearPedidoScreen(
                             )
 
                             pedidoViewModel.crearPedido(pedidoNuevo) { resultado ->
-                                if (resultado.contains("\u2705")) {
+                                if (resultado.contains("✅")) {
                                     carrito.clear()
-                                    pedidoViewModel.obtenerPedidos()
+                                    pedidoViewModel.obtenerPedidos(forceRefresh = true)
+                                    pedidoViewModel.cargarEstadoMesas()
 
-                                    // Volver a la pantalla de mesas
                                     navController.navigate("mesas") {
                                         popUpTo("mesas") { inclusive = true }
                                     }
                                 }
-                                // Los errores se muestran automáticamente en el Snackbar
                             }
                         }
                     },
@@ -280,10 +279,9 @@ fun CrearPedidoScreen(
                         .height(55.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("Registrar Pedido", color = Color.White, fontSize = 18.sp)
+                    Text("✅ Registrar Pedido", color = Color.White, fontSize = 18.sp)
                 }
 
-                // Mostrar mensaje general (si existe)
                 if (mensaje.isNotEmpty() && !mensaje.contains("Stock insuficiente")) {
                     Text(
                         mensaje,
@@ -345,26 +343,22 @@ fun ProductoCard(producto: Producto, carrito: MutableList<DetallePedido>) {
                         val cant = cantidad.toIntOrNull()
                         if (cant == null || cant <= 0) return@Button
 
-                        if (cant > producto.cantidad) {
-                            advertencia = "No hay suficientes unidades"
+                        val existente = carrito.find { it.producto.id == producto.id }
+                        if (existente != null) {
+                            val index = carrito.indexOf(existente)
+                            carrito[index] =
+                                existente.copy(cantidad = existente.cantidad + cant)
                         } else {
-                            val existente = carrito.find { it.producto.id == producto.id }
-                            if (existente != null) {
-                                val index = carrito.indexOf(existente)
-                                carrito[index] =
-                                    existente.copy(cantidad = existente.cantidad + cant)
-                            } else {
-                                carrito.add(
-                                    DetallePedido(
-                                        producto = producto,
-                                        cantidad = cant,
-                                        precioUnitario = producto.precio
-                                    )
+                            carrito.add(
+                                DetallePedido(
+                                    producto = producto,
+                                    cantidad = cant,
+                                    precioUnitario = producto.precio
                                 )
-                            }
-                            cantidad = ""
-                            advertencia = ""
+                            )
                         }
+                        cantidad = ""
+                        advertencia = ""
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
                     modifier = Modifier.height(56.dp)
