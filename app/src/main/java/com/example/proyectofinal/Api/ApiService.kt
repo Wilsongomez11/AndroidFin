@@ -7,6 +7,21 @@ import retrofit2.http.Path
 
 interface ApiService {
 
+
+    // --- FACTURAS ---
+    @POST("facturas/generar")
+    suspend fun generarFactura(
+        @Query("pedidoId") pedidoId: Long,
+        @Query("metodoPago") metodoPago: String,
+        @Query("propina") propina: Double = 0.0
+    ): Response<Factura>
+
+    @GET("facturas/{id}")
+    suspend fun getFacturaById(
+        @Path("id") id: Long
+    ): Response<Factura>
+
+
     // --- ADMINISTRADORES ---
     @GET("administrador")
     suspend fun getAdministradores(): List<Administrador>
@@ -168,4 +183,5 @@ interface ApiService {
 
     @DELETE("pizzeros/{id}")
     suspend fun eliminarPizzero(@Path("id") id: Long): Response<Void>
+
 }

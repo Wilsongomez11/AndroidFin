@@ -24,13 +24,16 @@ import com.example.proyectofinal.Model.DetallePedido
 import com.example.proyectofinal.Model.Pedido
 import com.example.proyectofinal.ViewModel.PedidoViewModel
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyectofinal.ViewModel.FacturaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetallePedidoScreen(
     pedido: Pedido,
     navController: NavHostController,
-    pedidoViewModel: PedidoViewModel
+    pedidoViewModel: PedidoViewModel,
+    facturaViewModel: FacturaViewModel = viewModel()
 ) {
     var detallesEditados by remember { mutableStateOf(pedido.detalles.map { it.copy() }) }
     var mostrarConfirmacion by remember { mutableStateOf(false) }
@@ -98,6 +101,8 @@ fun DetallePedidoScreen(
                     .padding(horizontal = 20.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
+                // -------------------- INFO DEL PEDIDO --------------------
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,6 +116,7 @@ fun DetallePedidoScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -165,44 +171,30 @@ fun DetallePedidoScreen(
                                     fontWeight = FontWeight.Medium
                                 )
                             }
-
-                            pedido.mesa?.let {
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text(
-                                        "\uD83E\uDE91 Mesa",
-                                        color = Color.LightGray,
-                                        fontSize = 12.sp
-                                    )
-                                    Text(
-                                        "$it",
-                                        color = Color(0xFF9C27B0),
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
                         }
 
-                        pedido.cliente?.let {
+                        pedido.mesa?.let {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "\uD83D\uDC64 Cliente",
+                                    "\uD83E\uDE91 Mesa",
                                     color = Color.LightGray,
                                     fontSize = 12.sp
                                 )
                                 Text(
-                                    it.nombre.ifBlank { "Cliente ${it.id}" },
-                                    color = Color.White,
-                                    fontSize = 14.sp
+                                    "${it.numero}",
+                                    color = Color(0xFF9C27B0),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                     }
                 }
 
+                // -------------------- TOTAL --------------------
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -241,126 +233,41 @@ fun DetallePedidoScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                if (detallesEditados.isNotEmpty()) {
-                    LazyColumn(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(detallesEditados) { detalle ->
-                            EditableDetalleCardAdmin(detalle) { nuevo ->
-                                detallesEditados = detallesEditados.map {
-                                    if (it.producto.id == nuevo.producto.id) nuevo else it
-                                }
+                // -------------------- LISTA DE PRODUCTOS --------------------
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(detallesEditados) { detalle ->
+                        EditableDetalleCardAdmin(detalle) { nuevo ->
+                            detallesEditados = detallesEditados.map {
+                                if (it.producto.id == nuevo.producto.id) nuevo else it
                             }
                         }
                     }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "No hay productos en este pedido",
-                            color = Color.LightGray,
-                            fontSize = 16.sp
-                        )
-                    }
                 }
 
+                // -------------------- BOTÓN GENERAR FACTURA --------------------
                 Button(
-                    onClick = { mostrarConfirmacion = true },
+                    onClick = {
+                        navController.navigate("factura/${pedido.id}")
+                    },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF5E17EB)
+                        containerColor = Color(0xFF4CAF50)
                     ),
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(60.dp)
                 ) {
-                    Text(
-                        "\u2714 Guardar Cambios",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("📄 Generar Factura", color = Color.White, fontSize = 18.sp)
                 }
-            }
-
-            if (mostrarConfirmacion) {
-                AlertDialog(
-                    onDismissRequest = { mostrarConfirmacion = false },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    val actualizado = pedido.copy(
-                                        detalles = detallesEditados,
-                                        total = total
-                                    )
-
-                                    pedidoViewModel.actualizarPedido(actualizado) { msg ->
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(msg)
-                                        }
-                                    }
-
-                                    mostrarConfirmacion = false
-                                    pedidoViewModel.obtenerPedidos(forceRefresh = true)
-                                    navController.popBackStack()
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF5E17EB)
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text("Confirmar", color = Color.White, fontWeight = FontWeight.Bold)
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { mostrarConfirmacion = false }) {
-                            Text("Cancelar", color = Color.White)
-                        }
-                    },
-                    icon = {
-                        Surface(
-                            color = Color(0xFF5E17EB).copy(alpha = 0.2f),
-                            shape = androidx.compose.foundation.shape.CircleShape,
-                            modifier = Modifier.size(56.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(text = "\u2714", fontSize = 28.sp)
-                            }
-                        }
-                    },
-                    title = {
-                        Text(
-                            "Confirmar cambios",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
-                    },
-                    text = {
-                        Text(
-                            "\u00BFDeseas guardar los cambios en este pedido?",
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 16.sp
-                        )
-                    },
-                    containerColor = Color(0xFF1E1E1E),
-                    shape = RoundedCornerShape(20.dp)
-                )
             }
         }
     }
 }
 
+// -------------------- CARD DE DETALLE --------------------
 @Composable
 fun EditableDetalleCardAdmin(
     detalle: DetallePedido,
@@ -379,6 +286,7 @@ fun EditableDetalleCardAdmin(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+
             Text(
                 detalle.producto.nombre,
                 color = Color.White,
@@ -391,6 +299,7 @@ fun EditableDetalleCardAdmin(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Text(
                     "Precio: $${String.format("%.2f", detalle.precioUnitario)}",
                     color = Color.LightGray,
@@ -401,11 +310,13 @@ fun EditableDetalleCardAdmin(
                     color = Color(0xFF5E17EB).copy(alpha = 0.2f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
+
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+
                         IconButton(
                             onClick = {
                                 if (detalle.cantidad > 1) {
@@ -414,18 +325,14 @@ fun EditableDetalleCardAdmin(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Icon(
-                                Icons.Default.Remove,
-                                contentDescription = "Disminuir",
-                                tint = Color.White
-                            )
+                            Icon(Icons.Default.Remove, null, tint = Color.White)
                         }
 
                         Text(
-                            text = "${detalle.cantidad}",
+                            "${detalle.cantidad}",
                             color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
                         )
 
                         IconButton(
@@ -434,11 +341,7 @@ fun EditableDetalleCardAdmin(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Aumentar",
-                                tint = Color.White
-                            )
+                            Icon(Icons.Default.Add, null, tint = Color.White)
                         }
                     }
                 }
@@ -451,11 +354,9 @@ fun EditableDetalleCardAdmin(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    "Subtotal:",
-                    color = Color.LightGray,
-                    fontSize = 14.sp
-                )
+
+                Text("Subtotal:", color = Color.LightGray, fontSize = 14.sp)
+
                 Text(
                     "$${String.format("%.2f", detalle.cantidad * detalle.precioUnitario)}",
                     color = Color(0xFF66BB6A),
@@ -465,4 +366,9 @@ fun EditableDetalleCardAdmin(
             }
         }
     }
+}
+
+
+private fun FacturaViewModel.generarFacturaRemota(lng: Long) {
+
 }

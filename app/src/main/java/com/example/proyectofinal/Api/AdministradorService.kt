@@ -6,6 +6,7 @@ import com.example.proyectofinal.Model.*
 import retrofit2.Response
 import retrofit2.http.*
 
+
 interface AdministradorService {
 
     // --- LOGIN ---
@@ -191,4 +192,20 @@ interface AdministradorService {
         @Query("montoPagado") montoPagado: Double,
         @Query("adminId") adminId: Long
     ): Map<String, Any>
+
+
+
+    @POST("facturas/generar")
+    suspend fun generarFactura(
+        @Query("pedidoId") pedidoId: Long,
+        @Query("metodoPago") metodoPago: String,
+        @Query("propina") propina: Double = 0.0
+    ): Response<Factura>
+
+    @GET("facturas")
+    suspend fun getFacturas(): Response<List<Factura>>
+
+    @GET("facturas/{id}")
+    suspend fun getFacturaById(@Path("id") id: Long): Response<Factura>
 }
+

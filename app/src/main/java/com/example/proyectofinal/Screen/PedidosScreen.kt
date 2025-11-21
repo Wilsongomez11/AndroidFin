@@ -506,4 +506,22 @@ fun PedidoCardAdmin(
             shape = RoundedCornerShape(20.dp)
         )
     }
+    Button(
+        onClick = {
+            val navController = null
+            navController.navigate("factura/${pedido.id}")
+        },
+        colors = ButtonDefaults.buttonColors(Color(0xFF4CAF50)),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+    ) {
+        Text("🧾 Generar Factura", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+private fun Nothing?.navigate(string: String) {
+
+
 }

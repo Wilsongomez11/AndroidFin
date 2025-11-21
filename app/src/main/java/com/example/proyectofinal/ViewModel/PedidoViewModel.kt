@@ -3,6 +3,7 @@ package com.example.proyectofinal.ViewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.proyectofinal.Api.ApiClient
 import com.example.proyectofinal.Model.Pedido
 import kotlinx.coroutines.Dispatchers
@@ -269,5 +270,38 @@ class PedidoViewModel : ViewModel() {
     fun limpiarError() {
         _mensaje.value = ""
         _errorDetallado.value = null
+    }
+
+
+    fun generarFactura(
+        pedidoId: Long,
+        metodoPago: String,
+        propina: Double,
+        navController: NavHostController
+    ) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                _mensaje.value = ""
+
+                val response = ApiClient.apiService.generarFactura(
+                    pedidoId = pedidoId,
+                    metodoPago = metodoPago,
+                    propina = propina
+                )
+
+                if (response.isSuccessful) {
+                    val factura = response.body()!!
+                    navController.navigate("factura/${factura.id}")
+                } else {
+                    _mensaje.value = "❌ Error generando factura: ${response.code()}"
+                }
+
+            } catch (e: Exception) {
+                _mensaje.value = "⚠ Error: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 }
