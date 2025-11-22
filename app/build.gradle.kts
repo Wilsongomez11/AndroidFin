@@ -60,6 +60,7 @@ kotlin {
 }
 
 dependencies {
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     implementation("androidx.compose.animation:animation:1.5.4")
     implementation("androidx.activity:activity-compose:1.8.0")
