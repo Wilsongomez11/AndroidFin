@@ -8,21 +8,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-
 import com.example.proyectofinal.Api.AdministradorService
 import com.example.proyectofinal.Screen.*
 import com.example.proyectofinal.ViewModel.*
 import com.example.proyectofinal.admin.VerPersonalScreen
 import com.example.proyectofinal.login.LoginScreen
-import com.example.proyectofinal.Model.Producto
-import com.example.proyectofinal.Model.Pedido
+
 
 @Composable
 fun AppNavigation(
@@ -61,7 +58,7 @@ fun AppNavigation(
         composable("admin") { AdminHomeScreen(navController, adminViewModel) }
         composable("mesero") { MeseroHomeScreen(navController) }
         composable("pizzero") { PizzeroHomeScreen(navController) }
-
+        composable("reportes") { ReportesScreen() }
         composable("personalMenu") { PersonalMenuScreen(navController) }
         composable("agregarPersonal") { AgregarPersonalScreen(navController) }
         composable("verPersonal") { VerPersonalScreen(navController) }

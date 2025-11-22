@@ -201,4 +201,30 @@ interface ApiService {
         @Path("id") id: Long
     ): Response<ResponseBody>
 
+    //REPORTES
+    @GET("facturas/reporte/dia")
+    suspend fun reporteDia(): Response<List<Factura>>
+
+    @GET("facturas/reporte/semana")
+    suspend fun reporteSemana(): Response<List<Factura>>
+
+    @GET("facturas/reporte/mes")
+    suspend fun reporteMes(): Response<List<Factura>>
+
+
+    @GET("facturas/excel/dia")
+    suspend fun excelDia(): Response<ResponseBody>
+
+    @GET("facturas/excel/semana")
+    suspend fun excelSemana(): Response<ResponseBody>
+
+    @GET("facturas/excel/mes")
+    suspend fun excelMes(): Response<ResponseBody>
+
+    @GET("facturas/reporte/excel")
+    suspend fun excelGenerico(
+        @retrofit2.http.Query("tipo") tipo: String
+    ): Response<ResponseBody>
+
 }
+

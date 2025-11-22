@@ -66,7 +66,7 @@ fun AdminHomeScreen(
                             when (selectedScreen) {
                                 "dashboard" -> "Panel Administrador"
                                 "personal" -> "Gestión de Personal"
-                                "reportes" -> "Reportes Power BI"
+                                "reportes" -> "Reportes"
                                 "inventario" -> "Gestión de Inventario"
                                 else -> "Panel"
                             },
@@ -102,7 +102,7 @@ fun AdminHomeScreen(
             ) {
                 when (selectedScreen) {
                     "dashboard" -> DashboardContent(adminViewModel, navController)
-                    "reportes" -> PowerBIPlaceholder()
+                    "reportes" -> ReportesScreen()
                     "personal" -> PersonalMenuScreen(navController)
                     "inventario" -> InventarioScreen(navController)
                     "pedidos" -> PedidosScreen(navController)
@@ -131,7 +131,7 @@ fun DrawerContent(
         Divider(color = Color.Gray)
 
         DrawerItem("\uD83D\uDCCA Dashboard", "dashboard", selected, onNavigate)
-        DrawerItem("\uD83D\uDCC8 Reportes Power BI", "reportes", selected, onNavigate)
+        DrawerItem("\uD83D\uDCC8 Reportes", "reportes", selected, onNavigate)
         DrawerItem("\uD83D\uDC65 Personal", "personal", selected, onNavigate)
         DrawerItem("\uD83D\uDCE6 Inventario", "inventario", selected, onNavigate)
         DrawerItem("\uD83D\uDCCB Pedidos", "pedidos", selected, onNavigate)

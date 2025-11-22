@@ -1,0 +1,26 @@
+[33m663761b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: commit (merge): actualizacion pizzeria
+[33m505125a[m HEAD@{1}: commit: actualizacion pizzeria
+[33m2086557[m HEAD@{2}: commit: actualizacion pizzeria
+[33m989ce80[m HEAD@{3}: commit: actualizacion pizzeria
+[33mfe588b0[m HEAD@{4}: commit: Proyecto
+[33m122ebb9[m HEAD@{5}: commit: Proyecto
+[33m301894f[m HEAD@{6}: pull --rebase origin main (finish): returning to refs/heads/main
+[33m301894f[m HEAD@{7}: pull --rebase origin main (pick): Proyecto
+[33m67e27f2[m HEAD@{8}: pull --rebase origin main (pick): proyectoFinal
+[33m762a92f[m HEAD@{9}: pull --rebase origin main (start): checkout 762a92f92da1c1ee53f657ee22a331a5420c5c6f
+[33me5bcc54[m HEAD@{10}: commit: Proyecto
+[33m7154bcb[m HEAD@{11}: commit: proyectoFinal
+[33mbe5f5fb[m HEAD@{12}: commit: proyectoFinal
+[33md963137[m HEAD@{13}: commit: proyectoFinal
+[33mf509ffb[m HEAD@{14}: commit: proyectoFinal
+[33mf415d08[m HEAD@{15}: commit: proyectoFinal
+[33m979061c[m HEAD@{16}: commit: proyectoFinal
+[33ma2a629b[m HEAD@{17}: commit: proyectoFinal
+[33m0a2f6b1[m HEAD@{18}: commit: proyectoFinal
+[33md183960[m HEAD@{19}: commit: proyectoFinal
+[33m0002e28[m HEAD@{20}: pull: Fast-forward
+[33m97664fe[m HEAD@{21}: commit: proyectoFinal
+[33mf83e9f9[m HEAD@{22}: commit: proyectoFinal
+[33mf168103[m HEAD@{23}: commit: proyectoFinal
+[33mccbbec0[m HEAD@{24}: Branch: renamed refs/heads/master to refs/heads/main
+[33mccbbec0[m HEAD@{26}: commit (initial): first commit

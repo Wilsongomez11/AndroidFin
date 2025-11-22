@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -45,7 +46,6 @@ import com.example.proyectofinal.admin.AuthViewModel
 import com.example.proyectofinal.admin.LoginState
 import kotlin.Long
 import kotlin.String
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
@@ -56,7 +56,6 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
 
-    // ViewModel correcto (ya no usa factory inexistente)
     val loginViewModel: LoginViewModel = viewModel()
     val meseroViewModel: MeseroViewModel = viewModel()
 
@@ -70,7 +69,7 @@ fun LoginScreen(
     val canSubmit = username.isNotBlank() && password.isNotBlank() && !isLoading
 
     var visible by remember { mutableStateOf(false) }
-    val logoScale by animateFloatAsState(if (visible) 1f else 0.8f)
+    val logoScale by animateFloatAsState(if (visible) 1f else 0.7f)
     val logoAlpha by animateFloatAsState(if (visible) 1f else 0f)
 
     LaunchedEffect(Unit) { visible = true }
@@ -80,12 +79,17 @@ fun LoginScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFF0B093B), Color(0xFF3A0CA3), Color(0xFF7209B7))
+                    listOf(
+                        Color(0xFF0B093B),
+                        Color(0xFF3A0CA3),
+                        Color(0xFF7209B7)
+                    )
                 )
             ),
         contentAlignment = Alignment.Center
     ) {
 
+        // Blur decorativo superior
         Image(
             painter = painterResource(id = R.drawable.pizza_logo),
             contentDescription = null,
@@ -94,7 +98,7 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
                 .blur(80.dp)
-                .alpha(0.15f)
+                .alpha(0.1f)
                 .padding(top = 40.dp)
         )
 
@@ -104,30 +108,40 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
+
+            // ---------------------- LOGO -------------------------
             Image(
                 painter = painterResource(id = R.drawable.pizza_logo),
                 contentDescription = "Logo de la pizzería",
                 modifier = Modifier
-                    .size(240.dp)
+                    .size(260.dp)
                     .scale(logoScale)
                     .alpha(logoAlpha)
             )
 
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(16.dp))
+
             Text(
                 "Bienvenido a Pizzería",
                 color = Color.White,
-                fontSize = 28.sp
-            )
-            Text(
-                "Inicia sesión para continuar",
-                color = Color.White.copy(0.8f),
-                fontSize = 17.sp,
-                modifier = Modifier.padding(bottom = 28.dp)
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
 
+            Text(
+                "Inicia sesión para continuar",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 17.sp,
+                modifier = Modifier.padding(bottom = 28.dp),
+                textAlign = TextAlign.Center
+            )
+
+            // ---------------------- CARD -------------------------
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(20.dp, RoundedCornerShape(30.dp)),
                 shape = RoundedCornerShape(30.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xDD1E1E1E))
             ) {
@@ -135,29 +149,44 @@ fun LoginScreen(
                     modifier = Modifier.padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
+                    // ---------------------- USUARIO -------------------------
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
-                        label = { Text("Usuario") },
-                        leadingIcon = { Icon(Icons.Default.Person, null) },
+                        label = { Text("Usuario", color = Color.LightGray) },
+                        leadingIcon = {
+                            Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF5E17EB))
+                        },
                         singleLine = true,
                         enabled = !isLoading,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF5E17EB),
+                            unfocusedBorderColor = Color.Gray,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            cursorColor = Color(0xFF5E17EB)
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                     )
 
                     Spacer(Modifier.height(20.dp))
 
+                    // ---------------------- CONTRASEÑA -------------------------
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Contraseña") },
-                        leadingIcon = { Icon(Icons.Default.Lock, null) },
+                        label = { Text("Contraseña", color = Color.LightGray) },
+                        leadingIcon = {
+                            Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF5E17EB))
+                        },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
-                                    if (passwordVisible) Icons.Default.VisibilityOff
-                                    else Icons.Default.Visibility,
-                                    contentDescription = null
+                                    if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null,
+                                    tint = Color(0xFF5E17EB)
                                 )
                             }
                         },
@@ -166,11 +195,19 @@ fun LoginScreen(
                             if (passwordVisible) VisualTransformation.None
                             else PasswordVisualTransformation(),
                         enabled = !isLoading,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF5E17EB),
+                            unfocusedBorderColor = Color.Gray,
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            cursorColor = Color(0xFF5E17EB)
+                        )
                     )
 
                     Spacer(Modifier.height(26.dp))
 
+                    // ---------------------- BOTÓN LOGIN -------------------------
                     Button(
                         onClick = {
                             loginViewModel.login(adminService, username, password)
@@ -178,7 +215,13 @@ fun LoginScreen(
                         enabled = canSubmit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(55.dp)
+                            .height(55.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF5E17EB),
+                            disabledContainerColor = Color(0x55FFFFFF),
+                            contentColor = Color.White
+                        )
                     ) {
                         Text("Iniciar sesión", fontSize = 19.sp)
                     }
@@ -191,7 +234,7 @@ fun LoginScreen(
                     if (loginState is LoginState.Error) {
                         Text(
                             (loginState as LoginState.Error).message,
-                            color = Color.Red,
+                            color = Color(0xFFFF6B6B),
                             modifier = Modifier.padding(top = 12.dp)
                         )
                     }
@@ -200,7 +243,7 @@ fun LoginScreen(
         }
     }
 
-    // Una vez inicia sesión correctamente
+    // ---------------------- LOGIN SUCCESS -------------------------
     if (loginState is LoginState.Success) {
         val user = (loginState as LoginState.Success).user
 
@@ -212,7 +255,6 @@ fun LoginScreen(
             ).show()
 
             when (user.cargo.uppercase()) {
-
                 "ADMINISTRADOR", "ADMIN" -> {
                     adminViewModel.establecerAdministradorActual(
                         Administrador(
@@ -231,9 +273,7 @@ fun LoginScreen(
                     navController.navigate("mesero")
                 }
 
-                "PIZZERO" -> {
-                    navController.navigate("pizzero")
-                }
+                "PIZZERO" -> navController.navigate("pizzero")
 
                 else -> onLoginSuccess(user)
             }
